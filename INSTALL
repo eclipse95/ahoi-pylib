@@ -1,0 +1,27 @@
+1.) Python library path
+
+in order to run all apps, you have to add the pylib library to the Python library path.
+
+Ubuntu:
+add the line
+
+export PYTHONPATH=${PYTHONPATH}:/path/to/pylib/
+
+(example: export PYTHONPATH=${PYTHONPATH}:~/git/ahoi/pylab/lib
+  
+to the file "~/.bashrc". Change the path correspondingly.
+
+
+
+2.) Python lib dependencies:
+
+- pylib makes use of the following third-party libraries, which have to be installed separately
+argparse
+configparser
+dataclasses
+imageviewer
+picamera
+pygame
+Pillow
+readline
+RPi
