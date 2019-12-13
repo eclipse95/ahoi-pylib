@@ -201,7 +201,7 @@ class Modem():
         #else:
         #    time.sleep()
         
-        return
+        return 0 # HOTFIX to avoid mosh showing improper parameter use for commands
         #return not self.__waitResp
 
     def getVersion(self):

@@ -7,7 +7,7 @@ add the line
 
 export PYTHONPATH=${PYTHONPATH}:/path/to/pylib/
 
-(example: export PYTHONPATH=${PYTHONPATH}:~/git/ahoi/pylab/lib
+(example: export PYTHONPATH=${PYTHONPATH}:~/git/ahoi/pylib/lib)
   
 to the file "~/.bashrc". Change the path correspondingly.
 
