@@ -1,0 +1,8 @@
+argparse
+configparser
+dataclasses
+#picamera
+pygame
+Pillow
+#readline
+RPi.GPIO

@@ -15,13 +15,9 @@ to the file "~/.bashrc". Change the path correspondingly.
 
 2.) Python lib dependencies:
 
-- pylib makes use of the following third-party libraries, which have to be installed separately
-argparse
-configparser
-dataclasses
-imageviewer
-picamera
-pygame
-Pillow
-readline
-RPi
+- pylib makes use of the third-party libraries listed in "requirements.txt", which have to be installed separately. Depending on your system and configuration, you may use the system's tools
+for installation or pip by running
+
+  pip3 install --user -r requirements.txt 
+
+
