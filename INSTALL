@@ -5,7 +5,7 @@ in order to run all apps, you have to add the pylib library to the Python librar
 Ubuntu:
 add the line
 
-export PYTHONPATH=${PYTHONPATH}:/path/to/pylib/
+export PYTHONPATH=${PYTHONPATH}:/path/to/pylib/lib
 
 (example: export PYTHONPATH=${PYTHONPATH}:~/git/ahoi/pylib/lib)
   
