@@ -1,23 +1,41 @@
 1.) Python library path
 
-in order to run all apps, you have to add the pylib library to the Python library path.
+In order to run all apps, you have to add the pylib library to the Python
+library path.
 
 Ubuntu:
 add the line
 
-export PYTHONPATH=${PYTHONPATH}:/path/to/pylib/lib
-
-(example: export PYTHONPATH=${PYTHONPATH}:~/git/ahoi/pylib/lib)
+  export PYTHONPATH=${PYTHONPATH}:/path/to/pylib/lib
   
-to the file "~/.bashrc". Change the path correspondingly.
+to the file "~/.bashrc". Change the path correspondingly. Please note that
+"/path/to/pylib" is the path to your copy of pylib, and the traling "/lib"
+is the lib-folder inside pylib.
+
+
+EXAMPLE:
+
+  export PYTHONPATH=${PYTHONPATH}:~/git/ahoi/pylib/lib)
+
+Here, pylib is located at "git/ahoi/pylib" inside the user's home folder.
+
 
 
 
 2.) Python lib dependencies:
 
-- pylib makes use of the third-party libraries listed in "requirements.txt", which have to be installed separately. Depending on your system and configuration, you may use the system's tools
-for installation or pip by running
+pylib makes use of the third-party libraries listed in "requirements.txt",
+which have to be installed separately. Depending on your system and
+configuration, you may use the system's tools for installation or PIP by
+running
 
   pip3 install --user -r requirements.txt 
 
+Since pylib is based on Python 3, make sure that you install the library
+for this version of Python. In above example, this is ensured by using
+"pip3".
+
+If you plan to use the image transmission app, additional libraries have
+to be installed. Please edit the file "requirements.txt" in this case by
+commenting in the relevant part. 
 

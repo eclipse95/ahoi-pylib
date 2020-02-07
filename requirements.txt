@@ -1,8 +1,24 @@
-argparse
-configparser
-dataclasses
+##
+## general requirements for pylib
+##
+
+argparse==1.4
+configparser==4
+pyserial==3.4
+
+## optional, may not compile/install when dependencies not fulfilled
+#readline 
+
+
+##
+## requirements for image transmission app and libs 
+## (uncomment to install with PIP)
+##
+
+#dataclasses==0.6
+#pygame
+#Pillow==7
+
+## NOTE these will only run on RaspBerry Pi
 #picamera
-pygame
-Pillow
-#readline
-RPi.GPIO
+#RPi.GPIO==0.7
