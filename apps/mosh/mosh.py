@@ -205,11 +205,11 @@ cmdList = {
     },
     "send": {
         'func': "doSend",
-        'param': 'addr:int pkttype:hex [ack:ACK_TYPE data:str]'
+        'param': 'addr:int pkttype:hex [flags:int [data:string]]'
     },
     "sendrep": {
         'func': "doSendRep",
-        'param': 'rep:int delay:float(sec) addr:int pkttype:hex [data:string]'
+        'param': 'rep:int delay:float(sec) addr:int pkttype:hex [flags:int [data:string]]'
     },
     "sfdstat": {
         'func': "doSfdStat",
@@ -676,18 +676,19 @@ def doSend(inp):
         pkttype = int(param[1], 16)
     except ValueError:
         return -1
-    ack = 0
+    
+    status = 0
     if(len(param) > 2):
         try:
-            ack = int(param[2])
+            status = int(param[2])
         except ValueError:
-            ack = 0
+            status = 0
 
     data = ''
     if len(param) > 3:
         data = data.join(param[3:])
 
-    return myModem.send(src=0, dst=dst, type=pkttype, status=ack,
+    return myModem.send(src=0, dst=dst, type=pkttype, status=status,
                         payload=data.encode('ascii', 'ignore'))
 
 
@@ -698,7 +699,7 @@ def doSendRep(inp):
 
     # send pkttype data
     param = inp[1].split(' ')
-    if (len(param) < 4) or (len(param) > 5):
+    if (len(param) < 4) or (len(param) > 6):
         return -1
 
     # init
@@ -716,9 +717,17 @@ def doSendRep(inp):
         pkttype = int(param[3], 16)
     except ValueError:
         return -1
+    
+    status = 0
+    if(len(param) > 4):
+        try:
+            status = int(param[4])
+        except ValueError:
+            status = 0
+    
     data = ''
-    if len(param) == 5:
-        data = param[4]
+    if len(param) == 6:
+        data = param[5]
 
     # send rep times with delay
     sigInt_disable()
@@ -730,7 +739,7 @@ def doSendRep(inp):
             time.sleep(delay)
 
         print("send-rep packet %3u of %u" % (i+1, rep))
-        ret = myModem.send(src=0, dst=dst, type=pkttype, status=0, dsn=(i%256),
+        ret = myModem.send(src=0, dst=dst, type=pkttype, status=status, dsn=(i%256),
                            payload=data.encode('ascii', 'ignore'))
         if ret != 0:
             return -1
