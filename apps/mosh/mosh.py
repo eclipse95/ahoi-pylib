@@ -44,6 +44,7 @@ import re
 import time
 import threading
 import os
+import argparse
 
 try:
     import readline
@@ -986,13 +987,26 @@ if __name__ == "__main__":
     ##
     # process command lines arguments
     ##
-    dev = None
-    if len(sys.argv) > 1:
-        dev = sys.argv[1]
+    
+    parser = argparse.ArgumentParser(
+        description="AHOI Modem Shell (MoSh).",
+        epilog="""\
+          NOTE: no security measures are implemented.
+          Input is not validated.""")
+    
+    parser.add_argument(
+        nargs = '?',
+        type = str,
+        default = None,
+        dest = 'dev',
+        metavar = 'device',
+        help = 'device name with connected ahoi modem')
+    
+    args = parser.parse_args()
 
-    # input = 1
+    # create modem instance and connect
     myModem = Modem()
-    myModem.connect(dev)
+    myModem.connect(args.dev)
     dev = myModem.com.dev
     myModem.setTxEcho(True)
     myModem.setRxEcho(True)

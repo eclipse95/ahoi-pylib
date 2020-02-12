@@ -83,7 +83,8 @@ class ModemSocketCom(ModemBaseCom):
         """Start as server."""
         self.serverMode = True
         #self.host = '' #socket.gethostname()
-        self.host = ModemSocketCom.__getip()
+        if not len(self.host):
+            self.host = ModemSocketCom.__getip()
         self.__makeDev()
         if cb is not None:
             self.rxCallback = cb

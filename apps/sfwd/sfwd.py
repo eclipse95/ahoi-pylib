@@ -1,7 +1,7 @@
 #! /usr/bin/env python3
 
 #
-# Copyright 2019
+# Copyright 2019-2020
 # 
 # Bernd-Christian Renner and
 # Hamburg University of Technology (TUHH).
@@ -63,18 +63,20 @@ if __name__ == "__main__":
     ##
     # process command lines arguments
     ##
-    dev = None
-    if len(sys.argv) > 1:
-        dev = sys.argv[1]
-    else:
-        dev = ModemSerialCom.scanAndSelect()
         
     parser = argparse.ArgumentParser(
         description="AHOI serial forwarder.",
         epilog="""\
           NOTE: no security measures are implemented.
           Input is not validated.""")
-
+    
+    parser.add_argument(
+        '-s', '--serial',
+        type = str,
+        default = '',
+        dest = 'ip',
+        help = 'TCP host (IP) address'
+        )
 
     parser.add_argument(
         '-p', '--port',
@@ -84,13 +86,24 @@ if __name__ == "__main__":
         help = 'TCP port (default: '+str(ModemSocketCom.DFLT_PORT)+')'
         )
     
+    parser.add_argument(
+        nargs = '?',
+        type = str,
+        default = None,
+        dest = 'dev',
+        metavar = 'device',
+        help = 'device name with connected ahoi modem')
+    
     args = parser.parse_args()
 
     # setup serial connection
-    com = ModemSerialCom(dev)
+    if args.dev is None:
+        args.dev = ModemSerialCom.scanAndSelect()
+        
+    com = ModemSerialCom(args.dev)
     
     # setup tcp connection
-    sock = ModemSocketCom(port = args.port)
+    sock = ModemSocketCom(port = args.port, host = args.ip)
 
     # cross connect
     com.connect(sock.send)
