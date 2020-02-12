@@ -55,10 +55,13 @@ class camera():
     def __init__(self,useCamera = True, useFlash = True):
         self.useCamera = useCamera
         self.useFlash = useFlash
-        try:
-            self.cam = PiCamera()
-        except:
-            self.useCamera = False
+        
+        if self.useCamera:
+            try:
+                self.cam = PiCamera()
+            except:
+                self.useCamera = False
+                
         if self.useFlash:
             try:
                 GPIO.setmode(GPIO.BCM)
