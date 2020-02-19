@@ -71,7 +71,7 @@ if __name__ == "__main__":
           Input is not validated.""")
     
     parser.add_argument(
-        '-s', '--serial',
+        '-i', '--ip',
         type = str,
         default = '',
         dest = 'ip',
