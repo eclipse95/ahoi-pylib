@@ -353,12 +353,19 @@ class Modem():
        pkt = makePacket(type=0xA1, payload=data)
        return self.__sendPacket(pkt)
 
-    def rxGain(self, stage=None, level=None):
+    def rxGain(self, level=None):
+        """Get or Set gain level of RX board (as defined by AGC)."""
+        data = bytearray()
+        if level is not None:
+            data += level.to_bytes(1, 'big')
+        pkt = makePacket(type=0x9E, payload=data)
+        return self.__sendPacket(pkt)
+
+    def rxGainRaw(self, stage=None, level=None):
         """Get or Set gain level of RX board."""
         data = bytearray()
         if stage is not None and level is not None:
             data += stage.to_bytes(1, 'big')
-            # data += level.to_bytes(1, 'big')
             data += level.to_bytes(1, 'big')
         pkt = makePacket(type=0x99, payload=data)
         return self.__sendPacket(pkt)

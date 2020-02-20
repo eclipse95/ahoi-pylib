@@ -1,5 +1,5 @@
 #
-# Copyright 2018-2019
+# Copyright 2018-2020
 # 
 # Fabian Steinmetz, Bernd-Christian Renner, and
 # Hamburg University of Technology (TUHH).
@@ -181,9 +181,9 @@ class ImageTx():
 
         
         # Modem Parameters
-        rxGain       = int(config['MODEM_PARAMETERS']['rxGain'], 16)
+        rxGain       = config['MODEM_PARAMETERS'].getint('rxGain')
         agc          = config['MODEM_PARAMETERS'].getboolean('agc')
-        txGain       = int(config['MODEM_PARAMETERS']['txGain'], 16)
+        txGain       = config['MODEM_PARAMETERS'].getint('txGain')
         spreadLength = config['MODEM_PARAMETERS'].getint('spreadLength')
         # Transmission Parameters
         self.transParam.camModemId            = config['TRANSMISSION_PARAMETERS'].getint('camModemId')
@@ -221,7 +221,7 @@ class ImageTx():
             self.myModem.rxGain()
         else:
             self.myModem.agc(0)
-            self.myModem.rxGain(1, rxGain)  # HACK
+            self.myModem.rxGain(rxGain)
             
         self._clearModemStats()
         self._getModemStats()

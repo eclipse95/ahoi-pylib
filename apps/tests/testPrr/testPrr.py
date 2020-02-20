@@ -84,8 +84,7 @@ def startTest(modem, role, pktcount, payload, rxg, sleepTime, pktType, txGain, s
         modem.rxGain()
     else:
         modem.agc(0)
-        #modem.rxGain(0, s0)
-        modem.rxGain(1, rxg)  # HACK
+        modem.rxGain(rxg)
     modem.clearPacketStat()
     modem.clearSyncStat()
     modem.clearSfdStat()

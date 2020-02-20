@@ -170,6 +170,10 @@ cmdList = {
     },
     "rxgain": {
         'func': "doRxGain",
+        'param': 'level:int'
+    },
+    "rxgainraw": {
+        'func': "doRxGainRaw",
         'param': 'stage:int level:int'
     },
     "powerlevel": {
@@ -319,6 +323,18 @@ def doDistance(inp):
 
 def doRxGain(inp):
     """Get/Set rx gain level."""
+    level = None
+    if len(inp) > 1:
+        param = inp[1].split(' ')
+        if len(param) != 1:
+            return -1
+
+        level = int(param[0])
+    return myModem.rxGain(level)
+
+
+def doRxGainRaw(inp):
+    """Get/Set rx gain level."""
     stage = None
     level = None
     if len(inp) > 1:
@@ -328,7 +344,7 @@ def doRxGain(inp):
 
         stage = int(param[0])
         level = int(param[1])
-    return myModem.rxGain(stage, level)
+    return myModem.rxGainRaw(stage, level)
 
 
 def doPeakWinLen(inp):
