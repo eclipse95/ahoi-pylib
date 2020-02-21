@@ -39,3 +39,22 @@ If you plan to use the image transmission app, additional libraries have
 to be installed. Please edit the file "requirements.txt" in this case by
 commenting in the relevant part. 
 
+
+
+3.) Access to serial devices
+
+Under Linux, please ensure that your user account is member of the group
+"dialout". You can check this by typing
+
+  groups
+
+on a terminal / in a command line window. If dialout does not show up in
+the produced list, you have to add yourself to this group:
+
+  sudo usermod -a -G dialout yourUserName
+
+where you must replace yourUserName by your user name. Please note that
+you need sudo/administrator rights for this action to succeed.
+
+After completion, please log out and in again to make the change effective.
+
