@@ -1,10 +1,29 @@
-1.) Python library path
+1.) Python
 
-In order to run all apps, you have to add the pylib library to the Python
-library path.
+Pylib has been developed for and under Python 3.x. It has been tested with
+Python 3.7 and 3.8 and we recommended using the latest version of Python 
+on Windows machines or the one that comes with your distribution on Linux.
 
-Ubuntu:
-add the line
+For Ubuntu, run
+
+  sudo apt install python3 
+  sudo apt install python3-pip  optional
+  
+For Windows (10), go to https://www.python.org/downloads/windows/ and
+download the latest stable release (e.g., Python 3.8.1 from Dec. 18, 2019).
+Make sure that you tick the box during installation that adds Python to
+your system path.
+Current releases of Python for Windows contain PIP already. You wil need
+PIP to install additional libraries that are required by pylib.
+
+
+
+2.) Setup Python to find pylib
+
+In order to run all apps from pylib, you have to add the pylib library to
+the Python library path.
+
+For Linux, add the line
 
   export PYTHONPATH=${PYTHONPATH}:/path/to/pylib/lib
   
@@ -12,17 +31,25 @@ to the file "~/.bashrc". Change the path correspondingly. Please note that
 "/path/to/pylib" is the path to your copy of pylib, and the traling "/lib"
 is the lib-folder inside pylib.
 
-
 EXAMPLE:
 
   export PYTHONPATH=${PYTHONPATH}:~/git/ahoi/pylib/lib)
 
 Here, pylib is located at "git/ahoi/pylib" inside the user's home folder.
 
+For Windows (10), go to system settings by the key combination "Win+Pause".
+Select "Advanced system settings" on the left of the opened window. Click
+the button "Environment Variables" at the very bottom and add the sytem
+environment variable PYTHONPATH with value
+
+  %PYTHONPATH%;C:\Users\You\path\to\pylib\lib
+  
+You have to replace the portion after the semicolon with the correct path
+to your pylib folder.
 
 
 
-2.) Python lib dependencies:
+3.) Python lib dependencies:
 
 pylib makes use of the third-party libraries listed in "requirements.txt",
 which have to be installed separately. Depending on your system and
@@ -30,6 +57,10 @@ configuration, you may use the system's tools for installation or PIP by
 running
 
   pip3 install --user -r requirements.txt 
+  
+In both Windows and Linux, this is done by opening a terminal/command line
+window and running above comments from within the folder, in which pylib
+resides.
 
 Since pylib is based on Python 3, make sure that you install the library
 for this version of Python. In above example, this is ensured by using
@@ -37,11 +68,11 @@ for this version of Python. In above example, this is ensured by using
 
 If you plan to use the image transmission app, additional libraries have
 to be installed. Please edit the file "requirements.txt" in this case by
-commenting in the relevant part. 
+commenting in the relevant part.
 
 
 
-3.) Access to serial devices
+4.) Access to serial devices (Linux only)
 
 Under Linux, please ensure that your user account is member of the group
 "dialout". You can check this by typing
@@ -58,3 +89,12 @@ you need sudo/administrator rights for this action to succeed.
 
 After completion, please log out and in again to make the change effective.
 
+
+
+5.) Running pylib apps and selecting a serial port
+
+You should now be able to run any pylib apps by navigating into the
+corresponding folder and executing the script. Most scripts will
+prompt you with a selection of the serial port, to which you modem
+is connected. It is also possible to provide the port as command line
+argument.
