@@ -33,7 +33,7 @@ is the lib-folder inside pylib.
 
 EXAMPLE:
 
-  export PYTHONPATH=${PYTHONPATH}:~/git/ahoi/pylib/lib)
+  export PYTHONPATH=${PYTHONPATH}:~/git/ahoi/pylib/lib
 
 Here, pylib is located at "git/ahoi/pylib" inside the user's home folder.
 
