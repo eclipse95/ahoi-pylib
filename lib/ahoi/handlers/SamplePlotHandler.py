@@ -1,5 +1,5 @@
 #
-# Copyright 2016-2019
+# Copyright 2016-2020
 # 
 # Bernd-Christian Renner and
 # Hamburg University of Technology (TUHH).
@@ -36,7 +36,7 @@
 """Handler to visualize sample data from modem."""
 
 
-from ahoi.handlers.Handler import Handler
+from ahoi.handlers.Handler import SampleHandler
 
 import numpy as np
 import math
@@ -45,16 +45,13 @@ import matplotlib.pyplot as plt
 from matplotlib.mlab import window_none
 
 
-class SamplePlotHandler(Handler):
+class SamplePlotHandler(SampleHandler):
     """SamplePlotHandler."""
     
     def __init__(self, nAdc = 12):
         # TODO
-        Handler.__init__(self)
-        self.data = []
-        self.numTotal = 0
-        self.numPost = 0
-        self.adcRange = pow(2, nAdc)
+        SampleHandler.__init__(self, nAdc)
+        
         #self.fig = plt.figure()
         self.fig, self.axs = plt.subplots(nrows=2, ncols=1, figsize=(10,6))  # figsize = (a,b)
         
@@ -65,6 +62,7 @@ class SamplePlotHandler(Handler):
         self.__Fmin = 50   # comm. freq. band lower limit (kHz)
         self.__Fmax = 75   # comm. freq. band upper limit (kHz)
 
+
     def __del__(self):
         pass
         #if (self.fig):
@@ -72,32 +70,10 @@ class SamplePlotHandler(Handler):
 
     def handlePkt(self, pkt):
         """handle a modem pkt"""
-        #Handler.handlePkt(self, pkt) # FIXME needed?
-        if (pkt.header.type != 0xA0):
-            return
+        SampleHandler.handlePkt(self, pkt) # FIXME needed?
         
-        if (pkt.header.len == 5):
-            self.numTotal = pkt.payload[1] * 256 + pkt.payload[2]
-            self.numPost = pkt.payload[3] * 256 + pkt.payload[4] 
-            self.data = []
-            
-        else:
-            nb = math.floor(pkt.header.len / 2)
-            if (len(self.data) + nb <= self.numTotal):
-                for i in range(0, nb):
-                    # TODO convert ADC range to [-2^(N-1),2^(N-1)[
-                    v = pkt.payload[2*i] * 256 + pkt.payload[2*i+1];
-                    #self.data.append(2*v / self.adcRange - 1)
-                    if (v >= 32768):
-                        v = v - 2**16
-                    self.data.append(v / 16384)
-                
-                #print(len(self.data))
-                
-                if (len(self.data) == self.numTotal):
-                    self.plot()
-#            else:
-#                # TODO warning
+        if SampleHandler.isComplete():
+            self.plot()
         
         
     def plot(self):
