@@ -48,12 +48,20 @@ from ahoi.com.serial import ModemSerialCom
 from ahoi.com.socket import ModemSocketCom
 
 
+sock = None
+com = None
+sockThread = None
+
+
 def sigInt_handler(signal, frame):
     # finish up
     print('Received SIGINT, closing ...')
-    sock.close()
-    com.close()
-    sockThread.join()
+    if sockThread is not None:
+        sockThread.join()
+    if sock is not None:
+        sock.close()
+    if com is not None:
+        com.close()
     exit()
   
 

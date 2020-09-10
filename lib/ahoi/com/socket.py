@@ -1,5 +1,5 @@
 #
-# Copyright 2016-2019
+# Copyright 2016-2020
 # 
 # Bernd-Christian Renner and
 # Hamburg University of Technology (TUHH).
@@ -120,7 +120,8 @@ class ModemSocketCom(ModemBaseCom):
                 self.sock.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
                 self.conn = self.sock
                 break
-            except:
+            except Exception as e:
+                print(e.message) # FIXME debug message
                 choice = input("Server not available. Retry? [Y/n] ")
                 if choice.lower() in ["n", "no"]:
                     exit()
