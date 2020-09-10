@@ -48,7 +48,7 @@ class ModemSocketCom(ModemBaseCom):
   
     DFLT_PORT = 2464  # ahoi
     
-    CLIENT_TIMEOUT = 0.1
+    CLIENT_TIMEOUT = 1.0
     SERVER_TIMEOUT = 1.0
   
     def __init__(self, host = '', port = None, cb = None):
