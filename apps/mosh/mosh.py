@@ -59,7 +59,7 @@ from ahoi.modem.packet import getHeaderBytes
 from ahoi.modem.packet import getFooterBytes
 
 # handlers
-#from ahoi.handlers.SamplePlotHandler import SamplePlotHandler
+# from ahoi.handlers.SamplePlotHandler import SamplePlotHandler
 # from ahoi.handlers.RangingHandler import RangingHandler
 
 

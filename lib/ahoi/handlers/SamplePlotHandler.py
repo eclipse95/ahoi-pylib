@@ -36,7 +36,7 @@
 """Handler to visualize sample data from modem."""
 
 
-from ahoi.handlers.Handler import SampleHandler
+from ahoi.handlers.SampleHandler import SampleHandler
 
 import numpy as np
 import math
@@ -48,9 +48,10 @@ from matplotlib.mlab import window_none
 class SamplePlotHandler(SampleHandler):
     """SamplePlotHandler."""
     
-    def __init__(self, nAdc = 12):
+    def __init__(self, nAdc = 12, show = False):
         # TODO
         SampleHandler.__init__(self, nAdc)
+        self.show = show
         
         #self.fig = plt.figure()
         self.fig, self.axs = plt.subplots(nrows=2, ncols=1, figsize=(10,6))  # figsize = (a,b)
@@ -72,7 +73,7 @@ class SamplePlotHandler(SampleHandler):
         """handle a modem pkt"""
         SampleHandler.handlePkt(self, pkt) # FIXME needed?
         
-        if SampleHandler.isComplete():
+        if self.show and self.isComplete():
             self.plot()
         
         

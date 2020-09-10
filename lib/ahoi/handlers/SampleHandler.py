@@ -84,7 +84,7 @@ class SampleHandler(Handler):
 
 
     def isComplete(self):
-        return len(self.data) == self.numTotal
+        return self.numTotal > 0 and len(self.data) == self.numTotal
 
 
 # EOF
