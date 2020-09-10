@@ -35,13 +35,9 @@ def process(file, show):
         pkt = byteArrayToPacket(b)        # byte array to packet
         
         # feed packet to sample handler
-        sh.handlePkt(pkt)
+        ret = sh.handlePkt(pkt)
         
-        if sh.isComplete():
-            if show:
-                input("Press Enter to continue ...")
-                sh.close()
-            
+        if ret and sh.isComplete():
             fn = os.path.splitext(file)[0] + '-%03u.dat' % (i)
             i = i + 1
             print("saving sample data to '%s'" % (fn))
@@ -50,6 +46,12 @@ def process(file, show):
             for d in sh.data:
                 fh.write(str(d)+'\n')
             fh.close()
+            
+            if show:
+                #sh.plot()
+                input("Press Enter to continue ...")
+                sh.close()
+            
                       
     ## Preprocess data
     ## Values are in the interval [-16384, 16383]

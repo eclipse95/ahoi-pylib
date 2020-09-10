@@ -53,10 +53,11 @@ class SamplePlotHandler(SampleHandler):
         SampleHandler.__init__(self, nAdc)
         self.show = show
         
-        #self.fig = plt.figure()
-        self.fig, self.axs = plt.subplots(nrows=2, ncols=1, figsize=(10,6))  # figsize = (a,b)
+        ##self.fig = plt.figure()
+        self.fig = None
+        #self.fig, self.axs = plt.subplots(nrows=2, ncols=1, figsize=(10,6))  # figsize = (a,b)
         
-        self.__cbar = False
+        #self.__cbar = False
         
         # const
         self.__Fs = 200    # sample frequency (kHz)
@@ -71,13 +72,19 @@ class SamplePlotHandler(SampleHandler):
 
     def handlePkt(self, pkt):
         """handle a modem pkt"""
-        SampleHandler.handlePkt(self, pkt) # FIXME needed?
+        ret = SampleHandler.handlePkt(self, pkt)
         
-        if self.show and self.isComplete():
+        if ret and self.show and self.isComplete():
             self.plot()
+            
+        return ret
         
         
     def plot(self):
+        if self.fig is None:
+            self.fig, self.axs = plt.subplots(nrows=2, ncols=1, figsize=(10,6))  # figsize = (a,b)
+            self.__cbar = False
+        
         #axt = self.axs[0]
         #axb = self.axs[1]
         axt, axb = self.axs.flatten()
@@ -143,8 +150,9 @@ class SamplePlotHandler(SampleHandler):
         
         
     def close(self):
-        if (self.fig):
+        if self.fig:
             plt.close(self.fig)
+            self.fig = None
 
 
 # EOF

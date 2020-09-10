@@ -63,10 +63,10 @@ class SampleHandler(Handler):
     def handlePkt(self, pkt):
         """handle a modem pkt"""
         #Handler.handlePkt(self, pkt) # FIXME needed?
-        if (pkt.header.type != 0xA0):
-            return
+        if pkt.header.type != 0xA0 or pkt.header.len == 0:
+            return False
         
-        if (pkt.header.len == 5):
+        if pkt.header.len == 5:
             self.src = pkt.header.src
             self.numTotal = pkt.payload[1] * 256 + pkt.payload[2]
             self.numPost = pkt.payload[3] * 256 + pkt.payload[4] 
@@ -81,6 +81,8 @@ class SampleHandler(Handler):
                     if (v >= 2**15):
                         v = v - 2**16
                     self.data.append(v / 2**14)
+                    
+        return True
 
 
     def isComplete(self):

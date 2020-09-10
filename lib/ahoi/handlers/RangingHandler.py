@@ -63,7 +63,7 @@ class RangingHandler(Handler):
         """handle a modem pkt"""
         #Handler.handlePkt(self, pkt) # FIXME needed?
         if (pkt.header.type != 0x7F or pkt.header.len != 16):
-            return
+            return False
         
         # sequence number (handle wraps)
         seq = pkt.header.seqno
@@ -85,6 +85,7 @@ class RangingHandler(Handler):
             self.dist.popleft()
             
         self.plot()
+        return True
         
         
     def plot(self):

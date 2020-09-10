@@ -47,7 +47,7 @@ class Handler():
 
     def handlePkt(self, pkt):
         """handle a modem pkt."""
-        pass
+        return False
       
     def update(self):
         """update internal state, redraw, etc."""
