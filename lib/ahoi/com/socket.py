@@ -151,8 +151,8 @@ class ModemSocketCom(ModemBaseCom):
                 print("socket.close() sock: " + str(e)) # FIXME debug message
                 pass
             self.sock = None
-                
-          
+            self.__forceClose = False
+        
         super().close()
 
         
@@ -172,13 +172,8 @@ class ModemSocketCom(ModemBaseCom):
                         break
                     except socket.timeout:
                         continue
-                    #except socket.error as msg:
                     except Exception as e:
                         print("socket.receive() srv: " + str(e)) # FIXME debug message
-                        #self.log.error('{}'.format(msg))
-                        #if self.conn is not None:
-                        #    print("ERROR: socket probably disconnected")
-                        # probably got disconnected
                         return
             
             while self.conn and not self.__forceClose:
@@ -194,18 +189,12 @@ class ModemSocketCom(ModemBaseCom):
                             break
                 except socket.timeout:
                     continue
-                #except socket.error as msg:
                 except Exception as e:
                     print("socket.receive() rx: " + str(e)) # FIXME debug message
-                    #self.log.error('{}'.format(msg))
-                    #if self.conn is not None:
-                    #    print("ERROR: socket probably disconnected")
-                    # probably got disconnected
                     return
                 
                 super().processRx(rx)
         
-        #self.conn.close()
         return
       
       
