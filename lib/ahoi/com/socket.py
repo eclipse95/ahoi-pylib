@@ -99,7 +99,8 @@ class ModemSocketCom(ModemBaseCom):
         try:
             self.sock.bind((self.host, self.port))
             self.sock.listen(1)
-        except:
+        except Exception as e:
+            print("socket.start(): " + str(e)) # FIXME debug message
             print("ERROR: cannot create server.")
             exit()
         
@@ -111,7 +112,10 @@ class ModemSocketCom(ModemBaseCom):
             
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         #self.sock.settimeout(None) # disable time-out
-        self.sock.settimeout(self.CLIENT_TIMEOUT)
+        # FIXME do we need a time-out here?
+        # having it leads to a 103 exception (software abort),
+        # in interleaving fashion with expected 111 (conn refused)
+        #self.sock.settimeout(self.CLIENT_TIMEOUT)
 
         print("Connecting via TCP to %s:%u" % (self.host, self.port))
         while True:
@@ -121,7 +125,7 @@ class ModemSocketCom(ModemBaseCom):
                 self.conn = self.sock
                 break
             except Exception as e:
-                print(e.message) # FIXME debug message
+                print("socket.connect(): " + str(e)) # FIXME debug message
                 choice = input("Server not available. Retry? [Y/n] ")
                 if choice.lower() in ["n", "no"]:
                     exit()
@@ -131,16 +135,23 @@ class ModemSocketCom(ModemBaseCom):
         """Terminate."""
         if self.sock:
             self.__forceClose = True
-            try:
-                if self.sock != self.conn:
+            if self.sock != self.conn and self.conn:
+                try:
+                    self.conn.shutdown(socket.SHUT_RDWR)
                     self.conn.close()
-                    #self.conn.shutdown()
-                    self.conn = None
+                except Exception as e:
+                    print("socket.close() conn: " + str(e)) # FIXME debug message
+                    pass
+                self.conn = None
+            
+            try:
+                self.sock.shutdown(socket.SHUT_RDWR)
                 self.sock.close()
-                self.sock = None
-                
-            except:
+            except Exception as e:
+                print("socket.close() sock: " + str(e)) # FIXME debug message
                 pass
+            self.sock = None
+                
           
         super().close()
 
@@ -148,19 +159,22 @@ class ModemSocketCom(ModemBaseCom):
     def receive(self):
         """Receive and decode TCP packet"""
         
-        while True and not self.__forceClose:
+        while not self.__forceClose:
             if self.serverMode:
                 while not self.__forceClose:
                     try:
                         self.conn, addr = self.sock.accept()
                         self.conn.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
                         #self.sock.settimeout(self.SERVER_TIMEOUT)
-                        #self.conn.settimeout(self.SERVER_TIMEOUT)
+                        # make sure that receiving doesn't block forever
+                        self.conn.settimeout(self.SERVER_TIMEOUT)
                         print("Connection from %s:%u established" % (addr[0], addr[1]))
                         break
                     except socket.timeout:
                         continue
-                    except socket.error as msg:
+                    #except socket.error as msg:
+                    except Exception as e:
+                        print("socket.receive() srv: " + str(e)) # FIXME debug message
                         #self.log.error('{}'.format(msg))
                         #if self.conn is not None:
                         #    print("ERROR: socket probably disconnected")
@@ -180,7 +194,9 @@ class ModemSocketCom(ModemBaseCom):
                             break
                 except socket.timeout:
                     continue
-                except socket.error as msg:
+                #except socket.error as msg:
+                except Exception as e:
+                    print("socket.receive() rx: " + str(e)) # FIXME debug message
                     #self.log.error('{}'.format(msg))
                     #if self.conn is not None:
                     #    print("ERROR: socket probably disconnected")

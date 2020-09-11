@@ -35,7 +35,7 @@
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
 
-"""This is the ahoi serial forwarded (TCP to serial translator)."""
+"""This is the ahoi serial forwarder (TCP to serial translator)."""
 
 #import signal
 import time
@@ -56,12 +56,12 @@ sockThread = None
 def sigInt_handler(signal, frame):
     # finish up
     print('Received SIGINT, closing ...')
-    if sockThread is not None:
-        sockThread.join()
     if sock is not None:
         sock.close()
     if com is not None:
         com.close()
+    if sockThread is not None:
+        sockThread.join()
     exit()
   
 
