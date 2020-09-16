@@ -305,13 +305,17 @@ class Modem():
         pkt = makePacket(type=0xB9)
         return self.__sendPacket(pkt)
 
-    def spreadCode(self, length=None):
-        """Get or Set spread code length."""
+    def bitSpread(self, chips=None):
+        """Get or Set bit spread (number of chips)."""
         data = bytearray()
         if length is not None:
             data = length.to_bytes(1, 'big')
         pkt = makePacket(type=0x95, payload=data)
         return self.__sendPacket(pkt)
+
+    # DEPRECATED
+    def spreadCode(self, length=None):
+        self.bitSpread(length)
 
     def filterRaw(self, stage=None, level=None):
         """Get or Set gain of RX board."""

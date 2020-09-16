@@ -1,4 +1,4 @@
-#! /usr/bin/env python3
+z#! /usr/bin/env python3
 
 #
 # Copyright 2016-2019
@@ -149,8 +149,12 @@ cmdList = {
         'param': ''
     },   # --> syncLevel
     "spreadcode": {
-        'func': "doSpreadCode",
+        'func': "doBitSpread",
         'param': 'length:int'
+    },
+    "bitspread": {
+        'func': "doBitSpread",
+        'param': 'chips:int'
     },
     "filterraw": {
         'func': "doFilterRaw",
@@ -766,16 +770,16 @@ def doSendRep(inp):
     return 0
 
 
-def doSpreadCode(inp):
+def doBitSpread(inp):
     """Set up spread-code."""
-    length = None
+    chips = None
     if len(inp) > 1:
         param = inp[1].split(' ')
         if len(param) != 1:
             return -1
 
-        length = int(param[0])
-    return myModem.spreadCode(length)
+        chips = int(param[0])
+    return myModem.bitSpread(chips)
 
 
 def doSyncLen(inp):

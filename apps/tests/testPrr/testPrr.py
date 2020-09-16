@@ -76,7 +76,7 @@ def startTest(modem, role, pktcount, payload, rxg, sleepTime, pktType, txGain, s
     modem.id()
     modem.getVersion()
     modem.getConfig()
-    modem.spreadCode(spread)
+    modem.bitSpread(spread)
     #modem.rangeDelay()
     modem.txGain(txGain)
     if rxg is None:
@@ -179,11 +179,11 @@ def main():
     #filterS0   = testConfig['PARAMETERS']['filterS0'].split(',')
     rxGain     = list(map(int, testConfig['PARAMETERS']['rxGain'].split(',')))
     txGain     = list(map(int, testConfig['PARAMETERS']['txGain'].split(',')))
-    spreadLen  = list(map(int, testConfig['PARAMETERS']['spreadLength'].split(',')))
+    bitSpread  = list(map(int, testConfig['PARAMETERS']['bitSpread'].split(',')))
     
     #
     testIdx = 0
-    for sp in spreadLen:
+    for sp in bitSpread:
         for pl in payloadLen:
             for tx in txGain:
                 if testAgc:

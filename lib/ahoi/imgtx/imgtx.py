@@ -130,7 +130,7 @@ class ImageTx():
         self.transParam = transParam(0,0,0,0,0,0)
         self.imgParam = imgParam((0,0),0,0,0,0)
         self.imgParamDflt = imgParam((0,0),0,0,0,0) # default image parameters
-        rxGain, agc, txGain, spreadLength = self._loadConfig()
+        rxGain, agc, txGain, bitSpread = self._loadConfig()
         
         # modem
         self.myModem = Modem()
@@ -139,7 +139,7 @@ class ImageTx():
         self.myModem.addRxCallback(self._receive)
         self.myModem.receive(thread = True)
         
-        self._initModem(rxGain, agc, txGain, spreadLength)        
+        self._initModem(rxGain, agc, txGain, bitSpread)        
         
         self.pktStat = pktStat(0,0,0,0,0)
         
@@ -181,10 +181,10 @@ class ImageTx():
 
         
         # Modem Parameters
-        rxGain       = config['MODEM_PARAMETERS'].getint('rxGain')
-        agc          = config['MODEM_PARAMETERS'].getboolean('agc')
-        txGain       = config['MODEM_PARAMETERS'].getint('txGain')
-        spreadLength = config['MODEM_PARAMETERS'].getint('spreadLength')
+        rxGain    = config['MODEM_PARAMETERS'].getint('rxGain')
+        agc       = config['MODEM_PARAMETERS'].getboolean('agc')
+        txGain    = config['MODEM_PARAMETERS'].getint('txGain')
+        bitSpread = config['MODEM_PARAMETERS'].getint('bitSpread')
         # Transmission Parameters
         self.transParam.camModemId            = config['TRANSMISSION_PARAMETERS'].getint('camModemId')
         self.transParam.hardAck               = config['TRANSMISSION_PARAMETERS'].getboolean('hardAck')
@@ -202,9 +202,9 @@ class ImageTx():
         self.imgParamDflt.useFlash     = config['IMAGE_PARAMETERS'].getboolean('useFlash')
         self.imgParamDflt.useCamera    = config['IMAGE_PARAMETERS'].getboolean('useCamera')
         
-        return rxGain, agc, txGain, spreadLength
+        return rxGain, agc, txGain, bitSpread
         
-    def _initModem(self,rxGain,agc,txGain,spreadLength):
+    def _initModem(self,rxGain,agc,txGain,bitSpread):
         if self.transParam.logging:
             self.timeStr = "{}".format(time.strftime("%Y%m%d-%H%M%S"))
             filename = self.timeStr
@@ -214,7 +214,7 @@ class ImageTx():
         self.myModem.id()
         self.myModem.getVersion()
         self.myModem.getConfig()
-        self.myModem.spreadCode(spreadLength)
+        self.myModem.bitSpread(bitSpread)
         self.myModem.txGain(txGain)
         if agc:
             self.myModem.agc(1)
