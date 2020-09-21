@@ -1,7 +1,7 @@
 #! /usr/bin/env python3
 
 #
-# Copyright 2016-2019
+# Copyright 2016-2020
 # 
 # Bernd-Christian Renner, Jan Heitmann, and
 # Hamburg University of Technology (TUHH).
@@ -267,7 +267,11 @@ cmdList = {
     "bootloader": {
         'func': "doBootloader",
         'param': ''
-    }
+    },
+    "program": {
+        'func': "doProgram",
+        'param': 'hex-image:string'
+    },
 }
 
 
@@ -312,6 +316,15 @@ def doBatVol(inp):
 def doBootloader(inp):
     """Reset uC and start Bootloader."""
     return myModem.startBootloader()
+
+
+
+def doProgram(inp):
+    """Reset uC, start Bootloader, write firmware image (hex)."""
+    if not len(inp) == 2:
+        return -1
+    return myModem.program(inp[1])
+    
 
 
 def doDistance(inp):

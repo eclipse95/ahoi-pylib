@@ -76,6 +76,18 @@ class ModemSerialCom(ModemBaseCom):
         except:
             print("ERROR: cannot connect to %s!" % self.dev)
             exit()
+            
+            
+    def reconnect(self):
+        self.__keepAlive = False
+        self.com.open()
+    
+    
+    def disconnect(self):
+        self.__keepAlive = True
+        self.com.flush()
+        self.com.cancel_read()
+        self.com.close()
 
 
     def close(self):
@@ -86,16 +98,18 @@ class ModemSerialCom(ModemBaseCom):
             pass
           
         super().close()
-
+        
 
     def receive(self):
         """Receive and decode serial packet"""
-        while self.com and self.com.is_open:
+        self.__keepAlive = False
+        while self.com and (self.com.is_open or self.__keepAlive):
             try:
                 rx = self.com.read(self.com.in_waiting or 1)
             except:
-                print("ERROR: Cannot receive packet, serial connection not open")
-                break
+                if not self.__keepAlive:
+                    print("ERROR: Cannot receive packet, serial connection not open")
+                    return
             
             super().processRx(rx)
             

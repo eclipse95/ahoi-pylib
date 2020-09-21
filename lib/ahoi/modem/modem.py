@@ -1,5 +1,5 @@
 #
-# Copyright 2016-2019
+# Copyright 2016-2020
 # 
 # Bernd-Christian Renner, Jan Heitmann, and
 # Hamburg University of Technology (TUHH).
@@ -37,8 +37,9 @@
 
 import time
 import string
-#import os.path
+import os.path
 import threading
+import subprocess
 
 from ahoi.modem.packet import makePacket
 from ahoi.modem.packet import packet2HexString
@@ -451,6 +452,50 @@ class Modem():
         data += post.to_bytes(2, 'big')
         pkt = makePacket(type=0xA0, payload=data)
         return self.__sendPacket(pkt)
+    
+    def program(self, img='ahoi.hex'):
+        # check if serially connected
+        if not isinstance(self.com, ModemSerialCom):
+            print("ERROR: programming only supported via serial communiation")
+            return -1
+        
+        # check if image exists
+        if not os.path.exists(img) or not os.path.isfile(img):
+            print("ERROR: firmware image '%s' does not exist" % (img))
+            return -1
+        
+        # check if stm32flash is available
+        # TODO
+        
+        # start bootloader
+        if self.startBootloader():
+            # TODO handle msg
+            return -1
+        
+        # disconnect MoSh from serial
+        self.com.disconnect()
+        
+        # install
+        try:
+            cmd = "stm32flash -w %s -v -R -b 115200 %s" % (img, self.com.dev)
+            #params = "-w %s -v -R -b 115200 %s" % (img, self.com.dev)
+            print("executing '%s'" % (cmd))
+            subprocess.call(cmd.split())
+        except OSError as e:
+            print("ERROR: failed (modem might have a corrupted image and may not respond")
+            self.com.reconnect()
+            # FIXME sync !!!
+            return self.reset()
+        
+            #if e.errno == errno.ENOENT:
+                ## handle file not found error.
+                
+            #else:
+                ## Something else went wrong while trying to run `wget`
+                #raise
+                
+        self.com.reconnect()
+        return 0
 
     def logOn(self, file_name=None):
         """Turn logging to file on."""
