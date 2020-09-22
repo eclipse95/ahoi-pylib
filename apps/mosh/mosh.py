@@ -110,19 +110,23 @@ def sigInt_check():
 cmdList = {
     "allstat": {
         'func': "doAllStat",
-        'param': ''
+        'param': '',
+        'info': "Get all statistics (this is equivalent to calling all '...stat' commands subsequently)"
     },
     "allstatclear": {
         'func': "doAllStatClear",
-        'param': ''
+        'param': '',
+        'info': "Clear all statistics (this is equivalent to calling all '...statclear' commands subsequently)"
     },
     "version": {
         'func': "doVersion",
-        'param': ''
+        'param': '',
+        'info': "Get firmware version"
     },
     "config": {
         'func': "doConfig",
-        'param': ''
+        'param': '',
+        'info': "Get build configuration of the firmware"
     },
     #"freqbandsnum": {
     #    'func': "doFreqBandsNum",
@@ -142,75 +146,93 @@ cmdList = {
     #},  # TODO
     "rxthresh": {
         'func': "doRxThresh",
-        'param': '[thresh:int]'
+        'param': '[thresh:int]',
+        'info': "Get/Set receive threshold (in percent). Changing this value should be done in conjunction with the result of calling 'rxlevel' several times. As a rule of thumb, the threshold should be 2-4 times the maximum rxlevel output."
     },  # --> syncThresh
     "rxlevel": {
         'func': "doRxLevel",
-        'param': ''
+        'param': '',
+        'info': "Get current amplitudes (levels) of the sync frequencies."
     },   # --> syncLevel
     "spreadcode": {
         'func': "doBitSpread",
-        'param': 'length:int'
+        'param': 'length:int',
+        'info': "DEPRECATED\nThis command has been superseded by 'bitspread' and will be removed in a later version of pylib."
     },
     "bitspread": {
         'func': "doBitSpread",
-        'param': 'chips:int'
+        'param': 'chips:int',
+        'info': "Get/set number of chips (spreading factor) per symbol."
     },
     "filterraw": {
         'func': "doFilterRaw",
-        'param': '[stage:int value:int]'
+        'param': '[stage:int value:int]',
+        'info': "TESTING\nGet/set raw values for filter stages"
     },
     "synclen": {
         'func': "doSyncLen",
-        'param': '[txlen:int rxlen:int]'
+        'param': '[txlen:int rxlen:int]',
+        'info': 'Get/set number of sync symbols being sent (txlen) and used for synchronization (rxlen <= txlen)'
     },
     "sniffmode": {
         'func': "doSniffMode",
-        'param': 'en:(on/off)'
+        'param': 'en:(on/off)',
+        'info': "Enable/disable sniffing mode, in which the modem will stop sending any ACKs (regular and ranging)"
     },
     "agc": {
         'func': "doAgc",
-        'param': 'en:(on/off)'
+        'param': 'en:(on/off)',
+        'info': "Get/set state of Automatic Gain Control (AGC)"
     },
     "rxgain": {
         'func': "doRxGain",
-        'param': 'level:int'
+        'param': 'level:int',
+        'info': "Get/set receive gain level (0-18, steps of 2dB, 0 being lowest). Changing the gain level has no (persisting) effect, if AGC is enabled."
     },
     "rxgainraw": {
         'func': "doRxGainRaw",
-        'param': 'stage:int level:int'
+        'param': 'stage:int level:int',
+        'info': "Get/set receive gain of the two individual stages (0,1). Changing the gain level has no (persisting) effect, if AGC is enabled."
     },
     "powerlevel": {
         'func': "doPowerLevel",
-        'param': ''
+        'param': '',
+        'info': "Get current power level on the channel (in percent). Measurement duration is that of a single symbol. A value above 100%% indicates potential oversteer."
     },
     "packetstat": {
         'func': "doPacketStat",
-        'param': ''
+        'param': '',
+        'info': "Get packet statistics since last reset"
     },
     "packetstatclear": {
         'func': "doPacketStatClear",
-        'param': ''
+        'param': '',
+        'info': "Clear packet statistics"
     },
     "peakwinlen": {
         'func': "doPeakWinLen",
-        'param': '[winlen:float(ms)]'
+        'param': '[winlen:float(ms)]',
+        'info': "TESTING\nGet/set length of window to find frequency peaks/symbols"
     },
     "range": {
         'func': "doRange",
-        'param': 'rep:int delay:float(sec) [addr:int data:string]'
+        'param': 'rep:int intvl:float(sec) [addr:int [data:string]]',
+        'info': "Send 'rep' ranging requests every 'intvl' seconds as broadcast. Broadcast requests will be answered by all receiving modems with a response. If the optional parameter 'addr' is provided, the request will be addressed to that modem (which will be the only one sending a response). Any response will be delayed as configured with 'range-delay'. Optional 'data' may be added to the request."
     },
     "range-delay": {
         'func': "doRangeDelay",
-        'param': 'delay:float(ms)'
+        'param': 'delay:float(ms)',
+        'info': "get/set the delay of the modem before answering a broadcast range request"
     },
     "reset": {
         'func': "doReset",
-        'param': ''
+        'param': '',
+        'info': "reset the modem (clearing all non-persistent state information)"
         },
     "sample": {
         'func': "doSample",
-        'param': 'trig:int len:int post:int'
+        'param': 'trig:int len:int post:int',
+        'info': "obtain len samples from the channel (as seen by the modem) with post samples taken after the trigger point and len-post before it (0 < len,post <= 20000). Triggers are:\n0: clear, 1: now, 2: sync, 3: end of packet"
     },
     "send": {
         'func': "doSend",
@@ -238,15 +260,18 @@ cmdList = {
     },
     "transducer": {
         'func': "doTransducer",
-        'param': '[transducer:uint(TRANSDUCER_*)]'
+        'param': '[transducer:uint(TRANSDUCER_*)]',
+        'info': "get/set transducer to compensate its specific transfer function."
     },
     "txgain": {
         'func': "doTxGain",
-        'param': 'value:int'
+        'param': 'value:int',
+        'info': "get/set transmit gain (in steps of -3dB, where value is a (positive) step number and 0 is maximum gain/output)"
     },
     "id": {
         'func': "doId",
-        'param': '[id:int]'
+        'param': '[id:int]',
+        'info': "get/set modem id"
     },
     "testfreq": {
         'func': "doTestFreq",
@@ -262,15 +287,18 @@ cmdList = {
     },
     "batvol": {
         'func': "doBatVol",
-        'param': ''
+        'param': '',
+        'info': "Read battery voltage from modem (mV)"
     },
     "bootloader": {
         'func': "doBootloader",
-        'param': ''
+        'param': '',
+        'info': "Reset modem and boot into bootloader mode (needs hardware reset to resume normal operation)"
     },
     "program": {
         'func': "doProgram",
-        'param': 'hex-image:string'
+        'param': 'hex-image:string',
+        'info': "EXPERIMENTAL\nflash a new modem firmware image to the"
     },
 }
 
@@ -930,6 +958,8 @@ def printUsage(cmd):
     """Print usage of mosh."""
     if cmd in cmdList:
         print("USAGE: %s %s" % (cmd, cmdList[cmd]['param']))
+        if 'info' in cmdList[cmd]:
+            print("INFO: " + cmdList[cmd]['info'])
     else:
         print("ERROR: no help available for unknown command")
     return
