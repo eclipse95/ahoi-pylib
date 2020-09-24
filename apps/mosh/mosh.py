@@ -255,6 +255,11 @@ cmdList = {
         'func': "doSfdStatClear",
         'param': ''
     },
+    "sleep": {
+        'func': "doSleep",
+        'param': '',
+        'info': "put modem into sleep mode (can only be undone via powercycle or WAKEUP pin)"
+    },
     "syncstat": {
         'func': "doSyncStat",
         'param': ''
@@ -731,6 +736,11 @@ def doRangeDelay(inp):
 def doReset(inp):
     """Reset the modem."""
     return myModem.reset()
+
+
+def doSleep(inp):
+    """Sleep the modem."""
+    return myModem.sleep()
 
 
 def doSample(inp):

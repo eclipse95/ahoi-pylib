@@ -37,7 +37,6 @@
 
 #import sys
 import time
-#import threading
 
 import serial
 from serial.tools.list_ports import comports
@@ -52,7 +51,6 @@ class ModemSerialCom(ModemBaseCom):
         super().__init__(dev, cb)
         self.com = None
         self.txDelay = 0.1
-        #self.__lock = threading.Semaphore()
     
     
     def __del__(self):
@@ -106,7 +104,6 @@ class ModemSerialCom(ModemBaseCom):
         """Receive and decode serial packet"""
         self.__keepAlive = False
         while self.com and (self.com.is_open or self.__keepAlive):
-            #self.__lock.acquire()
             try:
                 rx = self.com.read(self.com.in_waiting or 1)
             except:

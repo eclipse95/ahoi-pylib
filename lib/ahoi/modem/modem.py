@@ -459,6 +459,11 @@ class Modem():
         """Reset the MCU of the modem."""
         pkt = makePacket(type=0x87)
         return self.__sendPacket(pkt)
+      
+    def sleep(self):
+        """Put MCU/modem in sleep mode."""
+        pkt = makePacket(type=0x88)
+        return self.__sendPacket(pkt)
 
     def sample(self, trigger=None, num=None, post=None):
         """Get samples of oscilloscope."""
