@@ -182,7 +182,7 @@ cmdList = {
     "agc": {
         'func': "doAgc",
         'param': 'en:(on/off)',
-        'info': "Get/set state of Automatic Gain Control (AGC)"
+        'info': "Get/set state of Automatic Gain Control (AGC). Note that enabling AGC will overwrite a previously set receive gain."
     },
     "rxgain": {
         'func': "doRxGain",
@@ -297,8 +297,8 @@ cmdList = {
     },
     "program": {
         'func': "doProgram",
-        'param': 'hex-image:string',
-        'info': "EXPERIMENTAL\nflash a new modem firmware image to the"
+        'param': 'hex-image:string [empty:bool<false>]',
+        'info': "EXPERIMENTAL\nflash a new modem firmware image to an AHOI modem. If the device has not been programmed before, you must put it in bootloader mode manually (push boot button and power cycle the device) and call this command with parameter empty set to 'true'."
     },
 }
 
@@ -310,9 +310,9 @@ def doSniffMode(inp):
         param = inp[1].split(' ')
         if len(param) != 1:
             return -1
-        if param[0] == 'on' or param[0] == 'true':
+        if param[0] == 'on' or param[0].lower() == 'true':
             sniff = 1
-        elif param[0] == 'off' or param[0] == 'false':
+        elif param[0] == 'off' or param[0].lower() == 'false':
             sniff = 0
         else:
             return -1
@@ -326,9 +326,9 @@ def doAgc(inp):
         param = inp[1].split(' ')
         if len(param) != 1:
             return -1
-        if param[0] == 'on' or param[0] == 'true':
+        if param[0] == 'on' or param[0].lower() == 'true':
             agc_status = 1
-        elif param[0] == 'off' or param[0] == 'false':
+        elif param[0] == 'off' or param[0].lower() == 'false':
             agc_status = 0
         else:
             return -1
@@ -346,14 +346,21 @@ def doBootloader(inp):
     return myModem.startBootloader()
 
 
-
 def doProgram(inp):
     """Reset uC, start Bootloader, write firmware image (hex)."""
-    if not len(inp) == 2:
+    if len(inp) < 2:
         return -1
-    return myModem.program(inp[1])
+      
+    param = inp[1].split()
+    empty = False
+    if len(param) > 2:
+        return -1
+    elif len(param) == 2:
+        if param[1].lower() == 'true':
+            empty = True
     
-
+    return myModem.program(param[0], empty)
+    
 
 def doDistance(inp):
     """Get stored distance."""
@@ -862,7 +869,7 @@ def doTestSweep(inp):
         if len(param) < 0 or len(param) > 2 :
             return -1
 
-        gc = param[0] == 'True' or param[0] == 'true' #or isint(param[0]) != 0
+        gc = param[0].lower() == 'true' #or isint(param[0]) != 0
         if len(param) > 1 :
             gap = int(param[1])
 
@@ -879,7 +886,7 @@ def doTestNoise(inp):
         if len(param) < 0 or len(param) > 3 :
             return -1
 
-        gc = param[0] == 'True' or param[0] == 'true' #or int(param[0]) != 0
+        gc = param[0].lower() == 'true' #or int(param[0]) != 0
         if len(param) > 1 :
             gap = int(param[1])
         if len(param) > 2 :
@@ -957,11 +964,11 @@ def readInput():
 def printUsage(cmd):
     """Print usage of mosh."""
     if cmd in cmdList:
-        print("USAGE: %s %s" % (cmd, cmdList[cmd]['param']))
+        print("\nUSAGE: %s %s" % (cmd, cmdList[cmd]['param']))
         if 'info' in cmdList[cmd]:
-            print("INFO: " + cmdList[cmd]['info'])
+            print("\nINFO:  " + cmdList[cmd]['info'])
     else:
-        print("ERROR: no help available for unknown command")
+        print("\nERROR: no help available for unknown command")
     return
 
     

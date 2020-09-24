@@ -453,24 +453,25 @@ class Modem():
         pkt = makePacket(type=0xA0, payload=data)
         return self.__sendPacket(pkt)
     
-    def program(self, img='ahoi.hex'):
+    def program(self, img='ahoi.hex', bootloader=True):
         # check if serially connected
         if not isinstance(self.com, ModemSerialCom):
             print("ERROR: programming only supported via serial communiation")
-            return -1
+            return 0
         
         # check if image exists
         if not os.path.exists(img) or not os.path.isfile(img):
             print("ERROR: firmware image '%s' does not exist" % (img))
-            return -1
+            return 0
         
         # check if stm32flash is available
         # TODO
         
         # start bootloader
-        if self.startBootloader():
-            # TODO handle msg
-            return -1
+        if bootloader:
+            if self.startBootloader():
+                # TODO handle msg
+                return -1
         
         # disconnect MoSh from serial
         self.com.disconnect()
@@ -493,8 +494,12 @@ class Modem():
             #else:
                 ## Something else went wrong while trying to run `wget`
                 #raise
-                
+        
         self.com.reconnect()
+        
+        print("\n\nINFO: new firmware image '%s' has been installed and the device should be available\n" % (img))
+        #self.getVersion()
+        
         return 0
 
     def logOn(self, file_name=None):

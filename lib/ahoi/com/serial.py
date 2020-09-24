@@ -81,8 +81,8 @@ class ModemSerialCom(ModemBaseCom):
             
             
     def reconnect(self):
-        self.__keepAlive = False
         self.com.open()
+        self.__keepAlive = False
     
     
     def disconnect(self):
