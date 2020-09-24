@@ -453,7 +453,7 @@ class Modem():
         pkt = makePacket(type=0xA0, payload=data)
         return self.__sendPacket(pkt)
     
-    def program(self, img='ahoi.hex', bootloader=True):
+    def program(self, img='ahoi.hex', empty=False):
         # check if serially connected
         if not isinstance(self.com, ModemSerialCom):
             print("ERROR: programming only supported via serial communiation")
@@ -468,7 +468,7 @@ class Modem():
         # TODO
         
         # start bootloader
-        if bootloader:
+        if not empty:
             if self.startBootloader():
                 # TODO handle msg
                 return -1
@@ -481,19 +481,15 @@ class Modem():
             cmd = "stm32flash -w %s -v -R -b 115200 %s" % (img, self.com.dev)
             #params = "-w %s -v -R -b 115200 %s" % (img, self.com.dev)
             print("executing '%s'" % (cmd))
-            subprocess.call(cmd.split())
-        except OSError as e:
-            print("ERROR: failed (modem might have a corrupted image and may not respond")
+            subprocess.check_call(cmd.split())
+        except OSError:
+            print("ERROR: could not invoke programming tool")
             self.com.reconnect()
-            # FIXME sync !!!
             return self.reset()
-        
-            #if e.errno == errno.ENOENT:
-                ## handle file not found error.
-                
-            #else:
-                ## Something else went wrong while trying to run `wget`
-                #raise
+        except CalledProcessError:  
+            print("ERROR: failed (modem might have a corrupted image and may not respond)")
+            self.com.reconnect()
+            return self.reset()
         
         self.com.reconnect()
         
