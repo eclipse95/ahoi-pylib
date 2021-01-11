@@ -309,7 +309,7 @@ class Modem():
     def bitSpread(self, chips=None):
         """Get or Set bit spread (number of chips)."""
         data = bytearray()
-        if length is not None:
+        if chips is not None:
             data = length.to_bytes(1, 'big')
         pkt = makePacket(type=0x95, payload=data)
         return self.__sendPacket(pkt)
