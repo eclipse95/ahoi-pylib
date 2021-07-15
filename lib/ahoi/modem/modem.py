@@ -385,7 +385,15 @@ class Modem():
             data += winlen.to_bytes(2, 'big')
         pkt = makePacket(type=0x9B, payload=data)
         return self.__sendPacket(pkt)
-      
+    
+    def pktPin(self, mode=None):
+        """Get or Set pkt pin mode."""
+        data = bytearray()
+        if mode is not None:
+            data += mode.to_bytes(1, 'big')
+        pkt = makePacket(type=0x89, payload=data)
+        return self.__sendPacket(pkt)
+    
     def transducer(self, t=None):
         """Get or Set transducer type."""
         data = bytearray()

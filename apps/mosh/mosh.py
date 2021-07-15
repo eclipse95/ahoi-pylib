@@ -1,7 +1,7 @@
 #! /usr/bin/env python3
 
 #
-# Copyright 2016-2020
+# Copyright 2016-2021
 # 
 # Bernd-Christian Renner, Jan Heitmann, and
 # Hamburg University of Technology (TUHH).
@@ -214,6 +214,11 @@ cmdList = {
         'param': '[winlen:float(ms)]',
         'info': "TESTING\nGet/set length of window to find frequency peaks/symbols"
     },
+    "pktpin": {
+        'func': "doPktPin",
+        'param': '[mode:int]',
+        'info': "Set mode of pkt pin (0 = disabled, 1 = queue state, 2 = ranging)"
+    },
     "range": {
         'func': "doRange",
         'param': 'rep:int intvl:float(sec) [addr:int [data:string]]',
@@ -408,6 +413,18 @@ def doPeakWinLen(inp):
             return -1
         winlen = int(float(param[0]) * 1000)
     return myModem.peakWinLen(winlen)
+
+
+def doPktPin(inp):
+    """Get/Set rx gain level."""
+    mode = None
+    if len(inp) > 1:
+        param = inp[1].split(' ')
+        if len(param) != 1:
+            return -1
+
+        mode = int(param[0])
+    return myModem.pktPin(mode)
 
 
 def doTransducer(inp):
