@@ -121,7 +121,7 @@ class Modem():
     def removeRxHandler(self, h, type=None):
        """Remove a handler (class) to be called on rx pkt."""
        if h in self.rxHandlers:
-           self.rxHandlers.remove(cb)
+           self.rxHandlers.remove(h)
 
     def close(self):
         """Terminate."""
