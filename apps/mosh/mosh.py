@@ -290,6 +290,11 @@ cmdList = {
         'func': "doTestNoise",
         'param': '[gaincomp:bool<false> step:uint<1> duration:uint<1>]'
     },
+    "testsound": {
+        'func': "doTestSound",
+        'param': '[duration:uint<100>]',
+        'info': "Play an audible test sound (ca. 4kHz) for duration/100 s"
+    },
     "batvol": {
         'func': "doBatVol",
         'param': '',
@@ -910,6 +915,19 @@ def doTestNoise(inp):
             dur = int(param[2])
 
     return myModem.testNoise(gc, step, dur)
+
+
+def doTestSound(inp):
+    """Test sound (audible) output."""
+    dur  = 100
+    if len(inp) > 1:
+        param = inp[1].split(' ')
+        if len(param) < 0 or len(param) > 1 :
+            return -1
+
+        dur = int(param[0])
+
+    return myModem.testSound(dur)
 
 
 def doTxGain(inp):
