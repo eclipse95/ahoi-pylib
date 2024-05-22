@@ -35,9 +35,7 @@
 
 """Module for serial modem com interfacing."""
 
-#import sys
 import time
-#import threading
 
 import serial
 from serial.tools.list_ports import comports
@@ -46,51 +44,47 @@ from ahoi.com.base import ModemBaseCom
 
 
 class ModemSerialCom(ModemBaseCom):
-  
-    def __init__(self, dev = None, cb = None):
+
+    def __init__(self, dev=None, cb=None):
         """Initialize serial com."""
         super().__init__(dev, cb)
         self.com = None
         self.txDelay = 0.1
-        #self.__lock = threading.Semaphore()
-    
-    
+        self.__keepAlive = False
+        # self.__lock = threading.Semaphore()
+
     def __del__(self):
         """Close connection."""
         self.close()
-    
-    
-    def connect(self, cb = None):
+
+    def connect(self, cb=None):
         """Open the serial connection."""
         if cb is not None:
             self.rxCallback = cb
-            
+
         try:
             print("Using serial connection at %s" % self.dev)
             self.com = serial.Serial(
-                port = self.dev,
-                baudrate = 115200,
-                parity = serial.PARITY_NONE,
-                stopbits = serial.STOPBITS_ONE,
-                bytesize = serial.EIGHTBITS,
-                timeout = 0.1
+                port=self.dev,
+                baudrate=115200,
+                parity=serial.PARITY_NONE,
+                stopbits=serial.STOPBITS_ONE,
+                bytesize=serial.EIGHTBITS,
+                timeout=0.1
             )
         except:
             print("ERROR: cannot connect to %s!" % self.dev)
             exit()
-            
-            
+
     def reconnect(self):
         self.com.open()
         self.__keepAlive = False
-    
-    
+
     def disconnect(self):
         self.__keepAlive = True
         self.com.flush()
         self.com.cancel_read()
         self.com.close()
-
 
     def close(self):
         """Terminate."""
@@ -98,27 +92,26 @@ class ModemSerialCom(ModemBaseCom):
             self.com.close()
         except:
             pass
-          
+
         super().close()
-        
 
     def receive(self):
         """Receive and decode serial packet"""
         self.__keepAlive = False
         while self.com and (self.com.is_open or self.__keepAlive):
-            #self.__lock.acquire()
+            # self.__lock.acquire()
             try:
                 rx = self.com.read(self.com.in_waiting or 1)
             except:
                 if not self.__keepAlive:
                     print("ERROR: Cannot receive packet, serial connection not open")
                     return
-            
+
             super().processRx(rx)
-            
+
         return
 
-
+    @staticmethod
     def scanAndSelect():
         # TODO any better solution possible?
         return ModemBaseCom.scanAndSelect(ModemSerialCom)
@@ -129,20 +122,20 @@ class ModemSerialCom(ModemBaseCom):
         if not self.com or not self.com.is_open:
             print("ERROR: Cannot send packet, serial connection not open")
             return
-    
+
         # send encoded data
         tx = super().processTx(pkt)
         self.com.write(tx)
 
         time.sleep(self.txDelay)
-    
 
+    @staticmethod
     def scan():
         """find ports and ask user."""
         ports = []
         for n, (port, desc, hwid) in enumerate(sorted(comports()), 1):
             ports.append(port)
-            
+
         return ports
-        
+
 # eof
