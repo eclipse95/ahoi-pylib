@@ -34,10 +34,6 @@
 #
 
 """Module for TCP modem com interfacing."""
-
-#import sys
-#import time
-
 import socket
 
 import ahoi.modem.packet
@@ -45,13 +41,12 @@ from ahoi.com.base import ModemBaseCom
 
 
 class ModemSocketCom(ModemBaseCom):
-  
     DFLT_PORT = 2464  # ahoi
-    
+
     CLIENT_TIMEOUT = 1.0
     SERVER_TIMEOUT = 1.0
-  
-    def __init__(self, host = '', port = None, cb = None):
+
+    def __init__(self, host='', port=None, cb=None):
         """Initialize socket com."""
         # FIXME how to handle host and port?
         super().__init__('', cb)
@@ -65,21 +60,18 @@ class ModemSocketCom(ModemBaseCom):
         self.conn = None
         self.serverMode = False
         self.__forceClose = False
-    
-    
+
     def __del__(self):
         """Close connection."""
         self.close()
-        
-        
+
     def __makeDev(self):
         #h = self.host
         #if not h:
         #    h = 'localhost'
         self.dev = "%s:%u" % (self.host, self.port)
-        
-        
-    def start(self, cb = None):
+
+    def start(self, cb=None):
         """Start as server."""
         self.serverMode = True
         #self.host = '' #socket.gethostname()
@@ -88,28 +80,27 @@ class ModemSocketCom(ModemBaseCom):
         self.__makeDev()
         if cb is not None:
             self.rxCallback = cb
-            
+
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         #self.sock.settimeout(None) # disable time-out
         self.sock.settimeout(self.SERVER_TIMEOUT)
         print("Opening server via TCP at %s:%u" % (self.host, self.port))
         #print("Opening server via TCP at %s:%u" % ('localhost', self.port))
         self.conn = None
-        
+
         try:
             self.sock.bind((self.host, self.port))
             self.sock.listen(1)
         except Exception as e:
-            print("socket.start(): " + str(e)) # FIXME debug message
+            print("socket.start(): " + str(e))  # FIXME debug message
             print("ERROR: cannot create server.")
             exit()
-        
-    
-    def connect(self, cb = None):
+
+    def connect(self, cb=None):
         """Connect to server."""
         if cb is not None:
             self.rxCallback = cb
-            
+
         self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         #self.sock.settimeout(None) # disable time-out
         # FIXME do we need a time-out here?
@@ -125,11 +116,10 @@ class ModemSocketCom(ModemBaseCom):
                 self.conn = self.sock
                 break
             except Exception as e:
-                print("socket.connect(): " + str(e)) # FIXME debug message
+                print("socket.connect(): " + str(e))  # FIXME debug message
                 choice = input("Server not available. Retry? [Y/n] ")
                 if choice.lower() in ["n", "no"]:
                     exit()
-
 
     def close(self):
         """Terminate."""
@@ -140,25 +130,24 @@ class ModemSocketCom(ModemBaseCom):
                     self.conn.shutdown(socket.SHUT_RDWR)
                     self.conn.close()
                 except Exception as e:
-                    print("socket.close() conn: " + str(e)) # FIXME debug message
+                    print("socket.close() conn: " + str(e))  # FIXME debug message
                     pass
                 self.conn = None
-            
+
             try:
                 self.sock.shutdown(socket.SHUT_RDWR)
                 self.sock.close()
             except Exception as e:
-                print("socket.close() sock: " + str(e)) # FIXME debug message
+                print("socket.close() sock: " + str(e))  # FIXME debug message
                 pass
             self.sock = None
             self.__forceClose = False
-        
+
         super().close()
 
-        
     def receive(self):
         """Receive and decode TCP packet"""
-        
+
         while not self.__forceClose:
             if self.serverMode:
                 while not self.__forceClose:
@@ -173,9 +162,9 @@ class ModemSocketCom(ModemBaseCom):
                     except socket.timeout:
                         continue
                     except Exception as e:
-                        print("socket.receive() srv: " + str(e)) # FIXME debug message
+                        print("socket.receive() srv: " + str(e))  # FIXME debug message
                         return
-            
+
             while self.conn and not self.__forceClose:
                 try:
                     #rx = self.conn.recv(1, socket.MSG_CMSG_CLOEXEC)
@@ -183,44 +172,43 @@ class ModemSocketCom(ModemBaseCom):
                     if not rx:
                         if not self.serverMode:
                             print("ERROR: socket probably disconnected")
-                            return # FIXME is this enough?
+                            return  # FIXME is this enough?
                         else:
                             print("Client disconnected")
                             break
                 except socket.timeout:
                     continue
                 except Exception as e:
-                    print("socket.receive() rx: " + str(e)) # FIXME debug message
+                    print("socket.receive() rx: " + str(e))  # FIXME debug message
                     return
-                
+
                 super().processRx(rx)
-        
+
         return
-      
-      
+
     def send(self, pkt):
         """Send a packet."""
-        
+
         # send encoded data
         tx = super().processTx(pkt)
         self.conn.sendall(tx)
-        
-        
-    def scanAndSelect():
-        # TODO any better solution possible?
-        return ModemBaseCom.scanAndSelect(ModemSocketCom)
-    
 
-    def scan(subrange = range(1,255), port = None, timeout = 0.1):
+    @classmethod
+    def scanAndSelect(comType):
+        # TODO any better solution possible?
+        return super().scanAndSelect(comType)
+
+    @staticmethod
+    def scan(subrange=range(1, 255), port=None, timeout=0.1):
         baseIp = ModemSocketCom.__getip()
         baseIpParts = baseIp.split('.')
         ipLst = []
         if len(baseIpParts) != 4:
             return
-        
+
         if port is None:
             port = ModemSocketCom.DFLT_PORT
-        
+
         baseIpParts[3] = str(subrange[0])
         sip = '.'.join(baseIpParts)
         baseIpParts[3] = str(subrange[-1])
@@ -230,31 +218,31 @@ class ModemSocketCom(ModemBaseCom):
         for p in subrange:
             if i % 64 == 0:
                 print('%3u: ' % (subrange[i]), end='', flush=True)
-            
+
             # prepare ip address to test
             baseIpParts[3] = str(p)
-            tip = '.'.join(baseIpParts)            
+            tip = '.'.join(baseIpParts)
             #print("%s " % tip, end='')
-            
+
             # try to connect and add to list, if successful
             try:
                 tsock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-                tsock.settimeout(timeout) # disable time-out
+                tsock.settimeout(timeout)  # disable time-out
                 tsock.connect((tip, port))
                 tsock.close()
                 ipLst.append(tip)
                 print('*', end='', flush=True)
             except:
                 print('.', end='', flush=True)
-            
+
             # line-wrap
             i = i + 1
-            if i % 64 == 0 or i == len(subrange)  :
+            if i % 64 == 0 or i == len(subrange):
                 print('', flush=True)
-                
+
         return ipLst
 
-
+    @staticmethod
     def __getip():
         s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
         try:

@@ -37,31 +37,30 @@
 
 import time
 import os.path
+from io import TextIOWrapper
+from typing import Callable, Union
 
-import ahoi.modem.packet
+from ahoi.modem.packet import packet2HexString, byteArrayToPacket, getBytes
 from ahoi.com.streamer import Streamer
 
 
 class ModemBaseCom:
-  
-    def __init__(self, dev = None, cb = None):
+
+    def __init__(self, dev=None, cb=None):
         """Initialize serial com."""
         self.dev = dev
-        self.rxCallback = cb
-        self.streamer = Streamer()
-        self.logFile = None
-    
-    
+        self.rxCallback = cb    # type: Union[Callable, None]
+        self.streamer = Streamer()  # type: Streamer
+        self.logFile = None # type: Union[TextIOWrapper, None]
+
     def __del__(self):
         """Close connection."""
         self.close()
-    
-    
-    def connect(self, cb = None):
+
+    def connect(self, cb=None):
         """Register callback."""
         if cb is not None:
             self.rxCallback = cb
-
 
     def close(self):
         """Terminate."""
@@ -69,47 +68,41 @@ class ModemBaseCom:
         self.rxCallback = None
         self.logOff()
 
-
     def receive(self):
         """Receive a packet."""
         pass
-    
-    
+
     def send(self, pkt):
         """Send a packet."""
         pass
-      
-      
+
     def processRx(self, rx):
         """handle received bytes and decode packet"""
         for b in rx:
             r = self.streamer.dec(b)
             if r is not None and self.rxCallback is not None:
-                pkt = ahoi.modem.packet.byteArrayToPacket(r)
+                pkt = byteArrayToPacket(r)
                 self.__log(pkt)
                 self.rxCallback(pkt)
 
-
     def processTx(self, pkt):
         """handle pkt to send (prepare byte stream)"""
-        
+
         # merge header and payload to bytearray
-        pktbytes = ahoi.modem.packet.getBytes(pkt)
+        pktbytes = getBytes(pkt)
 
         # add start, stuffing and end sequence
         tx = self.streamer.enc(pktbytes)
-        
+
         return tx
-                        
-                        
+
     def __log(self, pkt):
         """Log packet"""
         if self.logFile is not None and not self.logFile.closed:
-            self.logFile.write("{:.3f}".format(time.time()) + " " + ahoi.modem.packet.packet2HexString(pkt) + "\n")
+            self.logFile.write("{:.3f}".format(time.time()) + " " + packet2HexString(pkt) + "\n")
             self.logFile.flush()
             os.fsync(self.logFile.fileno())
-      
-      
+
     def logOn(self, file_name=None):
         """Turn logging to file on."""
         if self.logFile is not None:
@@ -129,7 +122,6 @@ class ModemBaseCom:
         except OSError as e:
             print("Failed to open {}: {}".format(file_name, str(e)))
 
-
     def logOff(self):
         """Turn logging to file off."""
         if self.logFile is not None and not self.logFile.closed:
@@ -138,31 +130,31 @@ class ModemBaseCom:
             print("Closed logfile {}".format(self.logFile.name))
             self.logFile.close()
             self.logFile = None
-    
-    
-    def scan(self = None):
+
+    @staticmethod
+    def scan():
         return []
-    
-    
+
+    @classmethod
     def scanAndSelect(comType):
         """Find connections and ask user to select."""
         while True:
             conLst = comType.scan()
-            
+
             if len(conLst) == 0:
                 choice = input("No connection available. Retry? [Y/n] ")
                 if choice.lower() in ["n", "no"]:
                     exit()
             else:
                 break
-        
+
         while True:
             print("Available connections:")
             n = 1
             for con in conLst:
                 print("{:2}: {:20}".format(n, con))
                 n = n + 1
-                
+
             sel = input("Select connection (0 to abort): ")
             try:
                 index = int(sel) - 1
@@ -178,5 +170,5 @@ class ModemBaseCom:
                 continue
 
             return sel
-     
+
 # eof
