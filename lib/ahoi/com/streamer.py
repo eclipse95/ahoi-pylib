@@ -37,34 +37,34 @@
 
 import copy
 
+
 class Streamer:
-  
     DLE = 0x10
     STX = 0x02
     ETX = 0x03
-  
+
     def __init__(self):
         """Initialize streamer."""
         self.flagDLE = False
         self.flagInPacket = False
         self.res = bytearray()
-        
+
     def dec(self, b):
         if not self.flagDLE:
             # last char was no DLE -> simply
-            if (b == self.DLE):
+            if b == self.DLE:
                 self.flagDLE = True
-            elif (self.flagInPacket):
+            elif self.flagInPacket:
                 self.res.append(b)
         else:
             # found a new packet start
             # (DLE STX and not inside another packet)
-            if (b == self.STX and not self.flagInPacket):
+            if b == self.STX and not self.flagInPacket:
                 self.flagDLE = False
                 self.flagInPacket = True
 
             # found packet end (DLE ETX and inside packet)
-            elif (b == self.ETX and self.flagInPacket):
+            elif b == self.ETX and self.flagInPacket:
                 # reset internal state
                 self.flagInPacket = False
                 self.flagDLE = False
@@ -72,25 +72,24 @@ class Streamer:
                 del self.res[:]
                 return tmp
             # stuffed DLE (sent char was a DLE)
-            elif (b == self.DLE and self.flagInPacket):
+            elif b == self.DLE and self.flagInPacket:
                 self.flagDLE = False
                 self.res.append(b)
             # we ran into something that shouldn't happen
             # -> abort reception
-            elif (self.flagInPacket):
+            elif self.flagInPacket:
                 del self.res[:]
                 self.flagInPacket = False
                 self.flagDLE = False
-        
+
         return None
-      
-      
+
     def enc(self, pktbytes):
-        res = bytearray([0x10, 0x02]) # start Packet
+        res = bytearray([0x10, 0x02])  # start Packet
         for b in pktbytes:
             res.append(b)
             if b == 0x10:
-                res.append(b) # stuffing
+                res.append(b)  # stuffing
         res.extend([0x10, 0x03])  # end packet
         return res
 
