@@ -46,7 +46,6 @@ class RangingHandler(Handler):
 
     def __init__(self, c=1490, n=100):
         # TODO
-        Handler.__init__(self)
         self.seq = deque()
         self.dist = deque()
         self.c = c

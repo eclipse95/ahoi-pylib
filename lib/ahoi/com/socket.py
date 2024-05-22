@@ -194,9 +194,9 @@ class ModemSocketCom(ModemBaseCom):
         self.conn.sendall(tx)
 
     @classmethod
-    def scanAndSelect(comType):
+    def scanAndSelect(cls):
         # TODO any better solution possible?
-        return super().scanAndSelect(comType)
+        return ModemBaseCom.scanAndSelect(cls)
 
     @staticmethod
     def scan(subrange=range(1, 255), port=None, timeout=0.1):

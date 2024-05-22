@@ -111,11 +111,10 @@ class ModemSerialCom(ModemBaseCom):
 
         return
 
-    @staticmethod
-    def scanAndSelect():
+    @classmethod
+    def scanAndSelect(cls):
         # TODO any better solution possible?
-        return ModemBaseCom.scanAndSelect(ModemSerialCom)
-
+        return ModemBaseCom.scanAndSelect(cls)
 
     def send(self, pkt):
         """Send a packet."""

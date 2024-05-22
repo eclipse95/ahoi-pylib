@@ -135,7 +135,7 @@ class ModemBaseCom:
     def scan():
         return []
 
-    @classmethod
+    @staticmethod
     def scanAndSelect(comType):
         """Find connections and ask user to select."""
         while True:

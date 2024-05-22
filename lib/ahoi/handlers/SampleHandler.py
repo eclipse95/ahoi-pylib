@@ -45,7 +45,6 @@ class SampleHandler(Handler):
 
     def __init__(self, nAdc=12):
         # TODO
-        Handler.__init__(self)
         self.src = -1
         self.data = []
         self.numTotal = 0

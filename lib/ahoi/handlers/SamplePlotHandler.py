@@ -47,7 +47,7 @@ class SamplePlotHandler(SampleHandler):
 
     def __init__(self, nAdc=12, show=False):
         # TODO
-        SampleHandler.__init__(self, nAdc)
+        super().__init__(nAdc)
         self.show = show
 
         ##self.fig = plt.figure()

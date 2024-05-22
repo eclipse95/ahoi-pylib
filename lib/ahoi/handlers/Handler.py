@@ -34,24 +34,22 @@
 #
 
 """Handler base class."""
+from abc import ABC
 
-class Handler():
+
+class Handler(ABC):
     """Handler."""
-    
-    def __init__(self):
-        pass
-        
-    def reset():
+
+    def reset(self):
         """reset internal state."""
         pass
 
     def handlePkt(self, pkt):
         """handle a modem pkt."""
         return False
-      
+
     def update(self):
         """update internal state, redraw, etc."""
         pass
-        
 
 # EOF
