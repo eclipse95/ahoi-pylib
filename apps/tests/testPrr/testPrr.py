@@ -36,29 +36,22 @@
 #
 
 """test script to assess PRR of modems"""
-import time
 import configparser
 import os
 import time
-import sys
-import string
 
 # modem and serial connection
 from ahoi.modem.modem import Modem
 
-# from packet import getBytes
-from ahoi.modem.packet import getHeaderBytes
-from ahoi.modem.packet import getFooterBytes
 
-
-#def startTest(modem, role, src, pktcount, payload, s0, s1, sleepTime, pktType, txGain, distance, spread):
+# def startTest(modem, role, src, pktcount, payload, s0, s1, sleepTime, pktType, txGain, distance, spread):
 def startTest(modem, role, pktcount, payload, rxg, sleepTime, pktType, txGain, spread):
     """Start a single test."""
-    #filename = "{}_".format(time.strftime("%d%m%Y-%H%M%S"))
-    
+    # filename = "{}_".format(time.strftime("%d%m%Y-%H%M%S"))
+
     # prepare file name
     filename = ""
-    #filename += "id{:03d}_".format(src)
+    # filename += "id{:03d}_".format(src)
     filename += "{}_".format(role)
     filename += "pkt-{:04d}_".format(pktcount)
     filename += "pay-{:03d}_".format(payload)
@@ -70,14 +63,14 @@ def startTest(modem, role, pktcount, payload, rxg, sleepTime, pktType, txGain, s
     filename += "fs-{:1d}".format(spread)
     filename += ".{}".format(time.strftime("%Y%m%d-%H%M%S"))
     filename += ".log"
-    
+
     # set up modem
     modem.logOn(file_name=filename)
     modem.id()
     modem.getVersion()
     modem.getConfig()
     modem.bitSpread(spread)
-    #modem.rangeDelay()
+    # modem.rangeDelay()
     modem.txGain(txGain)
     if rxg is None:
         modem.agc(1)
@@ -92,24 +85,24 @@ def startTest(modem, role, pktcount, payload, rxg, sleepTime, pktType, txGain, s
     modem.getPowerLevel()
     modem.rxThresh()
     modem.rxLevel()
-    
+
     # run experiment after user OK
     if role == "tx":
         input("RX ready?")
         for i in range(0, pktcount):
             data = bytes(os.urandom(payload))
-            modem.send(src=0x00, dst=0xFF, payload=data, status=0, dsn= (i % 256), type=pktType)
+            modem.send(src=0x00, dst=0xFF, payload=data, status=0, dsn=(i % 256), type=pktType)
             time.sleep(sleepTime)
         print("TX DONE!")
     else:
         input("TX done?")
-        
+
     # stats
     modem.getPacketStat()
     modem.getSyncStat()
     modem.getSfdStat()
     modem.getPowerLevel()
-    
+
     # finalize
     time.sleep(1)
     modem.logOff()
@@ -117,7 +110,7 @@ def startTest(modem, role, pktcount, payload, rxg, sleepTime, pktType, txGain, s
 
 def main():
     """Main."""
-    
+
     ##
     # process command lines arguments
     ##
@@ -128,22 +121,21 @@ def main():
           NOTE: no security measures are implemented.
           Input is not validated.""")
 
-
     parser.add_argument(
         '-c', '--config',
-        type = str,
-        default = 'config/default.ini',
-        dest = 'confFile',
-        help = 'path to config file (default: config/default.ini)'
-        )
-    
+        type=str,
+        default='config/default.ini',
+        dest='confFile',
+        help='path to config file (default: config/default.ini)'
+    )
+
     parser.add_argument(
         '-d', '--device',
-        type = str,
-        default = None,
-        dest = 'dev',
-        help = 'device with modem connection (default: None)'
-        )
+        type=str,
+        default=None,
+        dest='dev',
+        help='device with modem connection (default: None)'
+    )
 
     args = parser.parse_args()
 
@@ -152,16 +144,16 @@ def main():
     myModem.connect(args.dev)
     myModem.setTxEcho(True)
     myModem.setRxEcho(True)
-    #myModem.addRxCallback(printRxRaw)
-    myModem.receive(thread = True)
+    # myModem.addRxCallback(printRxRaw)
+    myModem.receive(thread=True)
 
     # open config
     testConfig = configparser.ConfigParser()
     testConfig.read(args.confFile)
-    
+
     # read config
-    #role = testConfig['PARAMETERS'].getboolean('role')
-    #if not role in ["tx", "rx"]:
+    # role = testConfig['PARAMETERS'].getboolean('role')
+    # if not role in ["tx", "rx"]:
     #    print("Ups, role '{}' is invalid. Aborting.".format(role))
     #    sys.exit(1)
     while True:
@@ -170,17 +162,17 @@ def main():
             print("Ok. You are {}.".format(role))
             break
 
-    testAgc    = testConfig['PARAMETERS'].getboolean('testAgc')
-    pktCount   = testConfig['PARAMETERS'].getint('pktCount')
-    pktType    = int(testConfig['PARAMETERS']['pktType'], 16)
-    sleepTime  = testConfig['PARAMETERS'].getfloat('sleepTime')
+    testAgc = testConfig['PARAMETERS'].getboolean('testAgc')
+    pktCount = testConfig['PARAMETERS'].getint('pktCount')
+    pktType = int(testConfig['PARAMETERS']['pktType'], 16)
+    sleepTime = testConfig['PARAMETERS'].getfloat('sleepTime')
     payloadLen = list(map(int, testConfig['PARAMETERS']['payloadLength']
-                         .split(',')))
-    #filterS0   = testConfig['PARAMETERS']['filterS0'].split(',')
-    rxGain     = list(map(int, testConfig['PARAMETERS']['rxGain'].split(',')))
-    txGain     = list(map(int, testConfig['PARAMETERS']['txGain'].split(',')))
-    bitSpread  = list(map(int, testConfig['PARAMETERS']['bitSpread'].split(',')))
-    
+                          .split(',')))
+    # filterS0   = testConfig['PARAMETERS']['filterS0'].split(',')
+    rxGain = list(map(int, testConfig['PARAMETERS']['rxGain'].split(',')))
+    txGain = list(map(int, testConfig['PARAMETERS']['txGain'].split(',')))
+    bitSpread = list(map(int, testConfig['PARAMETERS']['bitSpread'].split(',')))
+
     #
     testIdx = 0
     for sp in bitSpread:
@@ -196,12 +188,13 @@ def main():
                         print("Skip test #{}.".format(testIdx))
                     else:
                         startTest(modem=myModem, role=role,
-                                  pktcount=pktCount, payload=pl, rxg=None, sleepTime=sleepTime, pktType=pktType, txGain=tx, spread=sp)
+                                  pktcount=pktCount, payload=pl, rxg=None, sleepTime=sleepTime, pktType=pktType,
+                                  txGain=tx, spread=sp)
                     testIdx = testIdx + 1
                 for rxg in rxGain:
                     if rxg >= 0:
                         doTest = input("Do test #{} (pkts={},pay={},rxgain={},txgain={},spread={})? [Y/n/exit]"
-                                      .format(testIdx, pktCount, pl, rxg, tx, sp))
+                                       .format(testIdx, pktCount, pl, rxg, tx, sp))
                         if doTest.lower() == "exit":
                             myModem.close()
                             return
@@ -209,7 +202,8 @@ def main():
                             print("Skip test #{}.".format(testIdx))
                         else:
                             startTest(modem=myModem, role=role,
-                                      pktcount=pktCount, payload=pl, rxg=rxg, sleepTime=sleepTime, pktType=pktType, txGain=tx, spread=sp)
+                                      pktcount=pktCount, payload=pl, rxg=rxg, sleepTime=sleepTime, pktType=pktType,
+                                      txGain=tx, spread=sp)
                         testIdx = testIdx + 1
 
     myModem.close()

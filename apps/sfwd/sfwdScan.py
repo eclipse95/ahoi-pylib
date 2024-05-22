@@ -37,19 +37,9 @@
 
 """This is Modem Shell (mosh)."""
 
-import time
-import sys
-import signal
-import re
-import time
-import threading
-
 from ahoi.com.socket import ModemSocketCom
 
-
 if __name__ == "__main__":
-    
     ModemSocketCom.scan()
-    
-    
+
 # eof

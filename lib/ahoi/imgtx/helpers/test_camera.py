@@ -33,11 +33,10 @@
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
 
-from PIL import Image
 import camera
 
 cam = camera.camera()
 
-img = cam.capture((640,480),1)
+img = cam.capture((640, 480), 1)
 img.show()
-img.save('test.jpg','JPEG')
+img.save('test.jpg', 'JPEG')

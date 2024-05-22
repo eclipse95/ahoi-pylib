@@ -33,14 +33,16 @@
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
 
-from PIL import Image
-import jfif_splitter
 import time
 from math import ceil
+
+from PIL import Image
+
 import imageviewer
+import jfif_splitter
 
 progressive = True
-#progressive = False
+# progressive = False
 
 im = Image.open("images/underwater1_1920x1440.jpg")
 imgTx = jfif_splitter.jfif_splitter(progressive)
@@ -48,59 +50,59 @@ imgRx = jfif_splitter.jfif_splitter(progressive)
 
 gui = imageviewer.imageviewer()
 
-imgTx.setImage(im,(640,480))
+imgTx.setImage(im, (640, 480))
 
 print(imgTx.getHeaderSize())
 print(imgTx.getDataSize())
 
-payloadSize = 64 # Byte
+payloadSize = 64  # Byte
 delay = 0.1
 
 header = imgTx.getHeader()
 data = imgTx.getData()
 
-numHeaderPkt = int(ceil(len(header)/payloadSize))
-numDataPkt = int(ceil(len(data)/payloadSize))
+numHeaderPkt = int(ceil(len(header) / payloadSize))
+numDataPkt = int(ceil(len(data) / payloadSize))
 
-gui.updateBar(0, numHeaderPkt+numDataPkt)
+gui.updateBar(0, numHeaderPkt + numDataPkt)
 gui.startTimer()
 
 # transmit header
-for i in range(0,numHeaderPkt):
-    idx1 = int(i*payloadSize)
-    if (i+1)*payloadSize-1 > len(header):
+for i in range(0, numHeaderPkt):
+    idx1 = int(i * payloadSize)
+    if (i + 1) * payloadSize - 1 > len(header):
         idx2 = int(len(header))
     else:
-        idx2 = int((i+1)*payloadSize)
-       
+        idx2 = int((i + 1) * payloadSize)
+
     imgRx.addHeader(header[idx1:idx2])
     im = imgRx.getImage()
     if im is not None:
         gui.updateImage(im)
-    gui.updateBar(i+1)
+    gui.updateBar(i + 1)
     time.sleep(delay)
 
 imgRx.headerFinish()
 
 # transmit data
-for i in range(0,numDataPkt):
-    idx1 = int(i*payloadSize)
-    if (i+1)*payloadSize-1 > len(data):
+for i in range(0, numDataPkt):
+    idx1 = int(i * payloadSize)
+    if (i + 1) * payloadSize - 1 > len(data):
         idx2 = int(len(data))
     else:
-        idx2 = int((i+1)*payloadSize)
-       
+        idx2 = int((i + 1) * payloadSize)
+
     imgRx.addData(data[idx1:idx2])
     im = imgRx.getImage()
     if im is not None:
         gui.updateImage(im)
-    gui.updateBar(i+1+numHeaderPkt)
+    gui.updateBar(i + 1 + numHeaderPkt)
     if i == 0:
         gui.resizeToImg()
     time.sleep(delay)
 
 gui.stopTimer()
-print("finish")    
+print("finish")
 
 while gui.isRunning():
     time.sleep(0.1)

@@ -37,16 +37,13 @@
 
 """This is the ahoi serial forwarder (TCP to serial translator)."""
 
-#import signal
-import time
-import sys
-import threading
-import signal
 import argparse
+import signal
+import threading
+import time
 
 from ahoi.com.serial import ModemSerialCom
 from ahoi.com.socket import ModemSocketCom
-
 
 sock = None
 com = None
@@ -63,69 +60,69 @@ def sigInt_handler(signal, frame):
     if sockThread is not None:
         sockThread.join()
     exit()
-  
+
 
 if __name__ == "__main__":
     signal.signal(signal.SIGINT, sigInt_handler)
-    
+
     ##
     # process command lines arguments
     ##
-        
+
     parser = argparse.ArgumentParser(
         description="AHOI serial forwarder.",
         epilog="""\
           NOTE: no security measures are implemented.
           Input is not validated.""")
-    
+
     parser.add_argument(
         '-i', '--ip',
-        type = str,
-        default = '',
-        dest = 'ip',
-        help = 'TCP host (IP) address'
-        )
+        type=str,
+        default='',
+        dest='ip',
+        help='TCP host (IP) address'
+    )
 
     parser.add_argument(
         '-p', '--port',
-        type = int,
-        default = None,
-        dest = 'port',
-        help = 'TCP port (default: '+str(ModemSocketCom.DFLT_PORT)+')'
-        )
-    
+        type=int,
+        default=None,
+        dest='port',
+        help='TCP port (default: ' + str(ModemSocketCom.DFLT_PORT) + ')'
+    )
+
     parser.add_argument(
-        nargs = '?',
-        type = str,
-        default = None,
-        dest = 'dev',
-        metavar = 'device',
-        help = 'device name with connected ahoi modem')
-    
+        nargs='?',
+        type=str,
+        default=None,
+        dest='dev',
+        metavar='device',
+        help='device name with connected ahoi modem')
+
     args = parser.parse_args()
 
     # setup serial connection
     if args.dev is None:
         args.dev = ModemSerialCom.scanAndSelect()
-        
+
     com = ModemSerialCom(args.dev)
-    
+
     # setup tcp connection
-    sock = ModemSocketCom(port = args.port, host = args.ip)
+    sock = ModemSocketCom(port=args.port, host=args.ip)
 
     # cross connect
     com.connect(sock.send)
     sock.start(com.send)
-    
+
     # logging
     t = time.strftime("%Y%m%d-%H%M%S")
-    com.logOn("sfwd-"+t+".tcp.log")
-    sock.logOn("sfwd-"+t+".serial.log")
+    com.logOn("sfwd-" + t + ".tcp.log")
+    sock.logOn("sfwd-" + t + ".serial.log")
 
     # create input thread
-    sockThread = threading.Thread(target = sock.receive)
+    sockThread = threading.Thread(target=sock.receive)
     sockThread.start()
-    
+
     # serial receive (blocking)
     com.receive()
 

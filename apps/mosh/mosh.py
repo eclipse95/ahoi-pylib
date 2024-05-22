@@ -37,14 +37,14 @@
 
 """This is Modem Shell (mosh)."""
 
-import time
-import sys
-import signal
-import re
-import time
-import threading
-import os
 import argparse
+import os
+import re
+import signal
+import threading
+import time
+from io import TextIOWrapper
+from typing import Union
 
 try:
     import readline
@@ -53,10 +53,6 @@ except ImportError:
 
 # modem and serial connection
 from ahoi.modem.modem import Modem
-
-# from packet import getBytes
-from ahoi.modem.packet import getHeaderBytes
-from ahoi.modem.packet import getFooterBytes
 
 # handlers
 # from ahoi.handlers.SamplePlotHandler import SamplePlotHandler
@@ -68,21 +64,23 @@ from ahoi.modem.packet import getFooterBytes
 ##
 sigIntEn = True
 gIrq = False
+
+
 def sigInt_handler(signal, frame):
     """Handle SIGINT (Ctrl+C)."""
     if sigIntEn:
         pass
         # FIXME this currently hangs due to input(...) in input thread
-        #print('Received SIGINT, closing ...')
-        #myModem.close()
-        #print("done, bye, bye.")
-        #exit()
-    
+        # print('Received SIGINT, closing ...')
+        # myModem.close()
+        # print("done, bye, bye.")
+        # exit()
+
     else:
         global gIrq
         gIrq = True
-        #sigIntEn = True
-        
+        # sigIntEn = True
+
 
 def sigInt_enable():
     global sigIntEn, gIrq
@@ -128,22 +126,22 @@ cmdList = {
         'param': '',
         'info': "Get build configuration of the firmware"
     },
-    #"freqbandsnum": {
+    # "freqbandsnum": {
     #    'func': "doFreqBandsNum",
     #    'param': '[num:int]'
-    #},
-    #"freqbands": {
+    # },
+    # "freqbands": {
     #    'func': "doFreqBands",
     #    'param': '[FREQ_BAND_NUM_MAX]x[FREQ_CARRIER_NUM_MAX]'
-    #},  # TODO
-    #"freqcarriersnum": {
+    # },  # TODO
+    # "freqcarriersnum": {
     #    'func': "doFreqCarriersNum",
     #    'param': '[num:int]'
-    #},
-    #"freqcarriers": {
+    # },
+    # "freqcarriers": {
     #    'func': "doFreqCarriers",
     #    'param': '[FREQ_BAND_NUM_MAX]x[FREQ_CARRIER_NUM_MAX]'
-    #},  # TODO
+    # },  # TODO
     "rxthresh": {
         'func': "doRxThresh",
         'param': '[thresh:int]',
@@ -153,7 +151,7 @@ cmdList = {
         'func': "doRxLevel",
         'param': '',
         'info': "Get current amplitudes (levels) of the sync frequencies."
-    },   # --> syncLevel
+    },  # --> syncLevel
     "spreadcode": {
         'func': "doBitSpread",
         'param': 'length:int',
@@ -233,7 +231,7 @@ cmdList = {
         'func': "doReset",
         'param': '',
         'info': "reset the modem (clearing all non-persistent state information)"
-        },
+    },
     "sample": {
         'func': "doSample",
         'param': 'trig:int len:int post:int',
@@ -355,7 +353,7 @@ def doProgram(inp):
     """Reset uC, start Bootloader, write firmware image (hex)."""
     if len(inp) < 2:
         return -1
-      
+
     param = inp[1].split()
     empty = False
     if len(param) > 2:
@@ -363,9 +361,9 @@ def doProgram(inp):
     elif len(param) == 2:
         if param[1].lower() == 'true':
             empty = True
-    
+
     return myModem.program(param[0], empty)
-    
+
 
 def doDistance(inp):
     """Get stored distance."""
@@ -533,8 +531,8 @@ def doLogOpen(inp):
         param = inp[1].split(' ')
         if len(param) != 1:
             return -1
-    return myModem.logOn(param[0])
-
+        return myModem.logOn(param[0])
+    # TODO add missing return
 
 def doLogClose():
     """Close log file."""
@@ -561,6 +559,7 @@ def doSyncStatClear(inp):
     """Clear sync stat."""
     return myModem.clearSyncStat()
 
+
 def doSfdStat(inp):
     """Get sfd stats."""
     return myModem.getSfdStat()
@@ -570,6 +569,7 @@ def doSfdStatClear(inp):
     """Clear sfd stat."""
     return myModem.clearSfdStat()
 
+
 def doAllStat(inp):
     """Get al tx/rx stats."""
     myModem.getPacketStat()
@@ -577,12 +577,14 @@ def doAllStat(inp):
     myModem.getSfdStat()
     return 0
 
+
 def doAllStatClear(inp):
     """Clear all tx/rx stat."""
     myModem.clearPacketStat()
     myModem.clearSyncStat()
     myModem.clearSfdStat()
     return 0
+
 
 def doPause(inp):
     """Do nothing for a while."""
@@ -598,10 +600,10 @@ def doPause(inp):
     time.sleep(delay)
 
     return 0
- 
+
 
 # TODO  
-#def doPlots(inp):
+# def doPlots(inp):
 #    """Enable/disable plots."""
 #    if len(inp) > 1:
 #        param = inp[1].split(' ')
@@ -631,7 +633,7 @@ def doPowerLevel(inp):
 ##
 # run commands from file (batch mode)
 ##
-runFile = False
+runFile = None # type: Union[TextIOWrapper, None]
 runFileName = ''
 
 
@@ -647,7 +649,7 @@ def doRun(inp):
         return -1
 
     runFileName = param[0]
-    if (os.path.isfile(runFileName)):
+    if os.path.isfile(runFileName):
         runFile = open(runFileName, 'r')
         print("running commands from \"%s\"" % runFileName)
         return 0
@@ -676,21 +678,21 @@ def doRxThresh(inp):
 
 def doRange(inp):
     """Get distance to other modems."""
-    if (len(inp) < 2):
+    if len(inp) < 2:
         return -1
 
     # rep / delay
     param = inp[1].split(' ')
-    if (len(param) < 2):
+    if len(param) < 2:
         return -1
 
     rep = int(param[0])
     delay = float(param[1])
     dst = 255
-    if (len(param) > 2 and param[2] != '*'):
+    if len(param) > 2 and param[2] != '*':
         dst = int(param[2])
     data = bytearray()
-    if (len(param) > 3):
+    if len(param) > 3:
         data = param[3].encode('ascii')
 
     # send rep times with delay
@@ -698,12 +700,12 @@ def doRange(inp):
     for i in range(0, rep):
         if sigInt_check():
             return 0
-        
+
         if i > 0:
             time.sleep(delay)
 
         # send ping and request pong (ranging ack)
-        ret = myModem.send(type=0x52, dst=dst, src=0, dsn=(i%256), status=2, payload=data)
+        ret = myModem.send(type=0x52, dst=dst, src=0, dsn=(i % 256), status=2, payload=data)
         if ret != 0:
             return -1
 
@@ -717,7 +719,7 @@ def doRangeDelay(inp):
     delay = None
     if len(inp) > 1:
         param = inp[1].split(' ')
-        if(len(param) != 1):
+        if len(param) != 1:
             return -1
         delay = int(param[0])
     return myModem.rangeDelay(delay)
@@ -730,11 +732,11 @@ def doReset(inp):
 
 def doSample(inp):
     """Get samples."""
-    if (len(inp) < 2):
+    if len(inp) < 2:
         return -1
 
     param = inp[1].split(' ')
-    if (len(param) < 3):
+    if len(param) < 3:
         return -1
 
     trig = int(param[0])
@@ -745,16 +747,16 @@ def doSample(inp):
 
 def doSend(inp):
     """Send a packet."""
-    if(len(inp) != 2):
+    if len(inp) != 2:
         return -1
 
     # send pkttype data
     param = inp[1].split(' ')
-    if (len(param) < 2):
+    if len(param) < 2:
         return -1
     # dst = MM_ADDR_BCAST
     dst = None
-    if (param[0] != '*'):
+    if param[0] != '*':
         if not param[0].isdigit():
             return -1
         dst = int(param[0])
@@ -762,9 +764,9 @@ def doSend(inp):
         pkttype = int(param[1], 16)
     except ValueError:
         return -1
-    
+
     status = 0
-    if(len(param) > 2):
+    if len(param) > 2:
         try:
             status = int(param[2])
         except ValueError:
@@ -780,7 +782,7 @@ def doSend(inp):
 
 def doSendRep(inp):
     """Send multiple packets (including sequence number)."""
-    if (len(inp) < 2):
+    if len(inp) < 2:
         return -1
 
     # send pkttype data
@@ -795,7 +797,7 @@ def doSendRep(inp):
     except ValueError:
         return -1
 
-    if (param[2] != '*'):
+    if param[2] != '*':
         if not param[2].isdigit():
             return -1
         dst = int(param[2])
@@ -803,14 +805,14 @@ def doSendRep(inp):
         pkttype = int(param[3], 16)
     except ValueError:
         return -1
-    
+
     status = 0
-    if(len(param) > 4):
+    if len(param) > 4:
         try:
             status = int(param[4])
         except ValueError:
             status = 0
-    
+
     data = ''
     if len(param) == 6:
         data = param[5]
@@ -820,12 +822,12 @@ def doSendRep(inp):
     for i in range(0, rep):
         if sigInt_check():
             return 0
-        
+
         if i > 0:
             time.sleep(delay)
 
-        print("send-rep packet %3u of %u" % (i+1, rep))
-        ret = myModem.send(src=0, dst=dst, type=pkttype, status=status, dsn=(i%256),
+        print("send-rep packet %3u of %u" % (i + 1, rep))
+        ret = myModem.send(src=0, dst=dst, type=pkttype, status=status, dsn=(i % 256),
                            payload=data.encode('ascii', 'ignore'))
         if ret != 0:
             return -1
@@ -868,26 +870,26 @@ def doTestFreq(inp):
     freq_lvl = 0
     if len(inp) > 1:
         param = inp[1].split(' ')
-        if len(param) < 1 or len(param) > 2 :
+        if len(param) < 1 or len(param) > 2:
             return -1
         freq_idx = int(param[0])
-        if (len(param) == 2) :
-          freq_lvl = min(int(param[1]), 100)
+        if len(param) == 2:
+            freq_lvl = min(int(param[1]), 100)
 
     return myModem.testFreq(freq_idx, freq_lvl)
 
 
 def doTestSweep(inp):
     """Test frequency sweep."""
-    gc  = False
+    gc = False
     gap = 0
     if len(inp) > 1:
         param = inp[1].split(' ')
-        if len(param) < 0 or len(param) > 2 :
+        if len(param) < 0 or len(param) > 2:
             return -1
 
-        gc = param[0].lower() == 'true' #or isint(param[0]) != 0
-        if len(param) > 1 :
+        gc = param[0].lower() == 'true'  # or isint(param[0]) != 0
+        if len(param) > 1:
             gap = int(param[1])
 
     return myModem.testSweep(gc, gap)
@@ -895,18 +897,18 @@ def doTestSweep(inp):
 
 def doTestNoise(inp):
     """Test noise (white noise in comm band) output."""
-    gc   = False
+    gc = False
     step = 1
-    dur  = 1
+    dur = 1
     if len(inp) > 1:
         param = inp[1].split(' ')
-        if len(param) < 0 or len(param) > 3 :
+        if len(param) < 0 or len(param) > 3:
             return -1
 
-        gc = param[0].lower() == 'true' #or int(param[0]) != 0
-        if len(param) > 1 :
+        gc = param[0].lower() == 'true'  # or int(param[0]) != 0
+        if len(param) > 1:
             gap = int(param[1])
-        if len(param) > 2 :
+        if len(param) > 2:
             dur = int(param[2])
 
     return myModem.testNoise(gc, step, dur)
@@ -915,7 +917,7 @@ def doTestNoise(inp):
 def doTxGain(inp):
     """Get/set Tx gain."""
     value = None
-    if (len(inp) > 1):
+    if len(inp) > 1:
         param = inp[1].split(' ')
         if len(param) != 1:
             return -1
@@ -940,7 +942,7 @@ def doWaitKey(inp):
     if match == '':
         prompt = '\nwaiting - hit enter to continue ... '
     else:
-        prompt = '\nwaiting - enter "%s" to continue ... ' % (match)
+        prompt = '\nwaiting - enter "%s" to continue ... ' % match
     while True:
         inp = input(prompt)
         if match == '' or match == inp:
@@ -959,23 +961,22 @@ def readInput():
     global runFile
     global prompted
 
-    if (runFile):
+    if runFile is not None and not runFile.closed:
         inp = runFile.readline()
 
-        if (len(inp) > 0):
+        if len(inp) > 0:
             inp = inp.rstrip('\n')
             print('\nmosh@%s >> %s (from "%s")' % (dev, inp, runFileName))
         else:
             runFile.close()
-            runFile = False
+            #runFile = False
 
-    if (not runFile):
+    if not runFile:
         prompted = True
-        inp = input("\nmosh@%s >> " % (dev))
+        inp = input("\nmosh@%s >> " % dev)
         prompted = False
 
     return inp
-
 
 
 def printUsage(cmd):
@@ -988,11 +989,8 @@ def printUsage(cmd):
         print("\nERROR: no help available for unknown command")
     return
 
-    
-  
 
 def __inputThread():
-
     while True:
         # get keyboard input (blocking)
 
@@ -1002,11 +1000,11 @@ def __inputThread():
 
         # split input into command and params
         inp = inp.strip()  # strip leading/trailing spaces
-        inp = re.sub("\s{2,}", " ", inp)  # remove multiple spaces (make one)
+        inp = re.sub(r"\s{2,}", " ", inp)  # remove multiple spaces (make one)
         inp = inp.split(' ', 1)
         cmd = inp[0]
 
-        if (len(cmd) > 0 and cmd[0] != '#'):
+        if len(cmd) > 0 and cmd[0] != '#':
             if cmd == 'exit' or cmd == 'quit':
                 myModem.close()
                 exit()
@@ -1035,8 +1033,8 @@ def __inputThread():
 
             elif cmd == 'waitkey':
                 doWaitKey(inp)
-                
-            #elif cmd == 'plots':
+
+            # elif cmd == 'plots':
             #    doPlots(inp)
 
             else:
@@ -1064,8 +1062,6 @@ def __inputThread():
                     print("ERROR: unknown command ")
 
 
-
-
 if __name__ == "__main__":
     signal.signal(signal.SIGINT, sigInt_handler)
     # print('Press Ctrl+C')
@@ -1074,21 +1070,21 @@ if __name__ == "__main__":
     ##
     # process command lines arguments
     ##
-    
+
     parser = argparse.ArgumentParser(
         description="AHOI Modem Shell (MoSh).",
         epilog="""\
           NOTE: no security measures are implemented.
           Input is not validated.""")
-    
+
     parser.add_argument(
-        nargs = '?',
-        type = str,
-        default = None,
-        dest = 'dev',
-        metavar = 'device',
-        help = 'device name with connected ahoi modem')
-    
+        nargs='?',
+        type=str,
+        default=None,
+        dest='dev',
+        metavar='device',
+        help='device name with connected ahoi modem')
+
     args = parser.parse_args()
 
     # create modem instance and connect
@@ -1097,23 +1093,23 @@ if __name__ == "__main__":
     dev = myModem.com.dev
     myModem.setTxEcho(True)
     myModem.setRxEcho(True)
-    #myModem.addRxCallback(printRxRaw)
-    
+    # myModem.addRxCallback(printRxRaw)
+
     # sample plot handler
-    #myModem.addRxHandler(SamplePlotHandler())
-    #myModem.addRxHandler(RangingHandler())
-    
+    # myModem.addRxHandler(SamplePlotHandler())
+    # myModem.addRxHandler(RangingHandler())
+
     # create input thread
     print("\nEnter your commands below.\r\n"
-        "Type \"help\" for a list of commands, type \"exit\" to leave"
-    )
+          "Type \"help\" for a list of commands, type \"exit\" to leave"
+          )
     inputThread = threading.Thread(target=__inputThread)
     inputThread.start()
-    
+
     # process
     myModem.receive()
-    
+
     # finish up
     inputThread.join()
-    
+
 # eof

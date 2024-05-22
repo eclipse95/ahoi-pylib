@@ -33,28 +33,29 @@
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
 
-import imageviewer
 import time
+
 from PIL import Image
+
+import imageviewer
 
 gui = imageviewer.imageviewer()
 
-gui.updateBar(0,20)
+gui.updateBar(0, 20)
 gui.startTimer()
-for i in range(0,21):
+for i in range(0, 21):
     time.sleep(0.5)
     gui.updateBar(i)
-    
+
 time.sleep(2)
 img = Image.open("images/underwater1_1920x1080.jpg")
-img = img.resize((960,520))
+img = img.resize((960, 520))
 gui.updateImage(img)
 
 gui.resizeToImg()
 
-
-#time.sleep(5)
-#gui.close()
+# time.sleep(5)
+# gui.close()
 
 while gui.isRunning():
     time.sleep(0.1)
@@ -62,4 +63,3 @@ while gui.isRunning():
 gui.stopTimer()
 
 print(gui.getTimerValue())
-

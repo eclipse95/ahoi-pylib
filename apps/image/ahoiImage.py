@@ -36,16 +36,12 @@
 #
 
 
-import time
-import os
-import sys
 import re
-import string
 
-from ahoi.imgtx.imgtx import ImageTx
 from ahoi.com.serial import ModemSerialCom
-   
-    
+from ahoi.imgtx.imgtx import ImageTx
+
+
 def main():
     import argparse
     parser = argparse.ArgumentParser(
@@ -54,46 +50,45 @@ def main():
           NOTE: no security measures are implemented.
           Input is not validated.""")
 
-
     parser.add_argument(
         '-c', '--config',
-        type = str,
-        default = 'config/default.ini',
-        dest = 'confFile',
-        help = 'path to config file (default: config/default.ini)'
-        )
+        type=str,
+        default='config/default.ini',
+        dest='confFile',
+        help='path to config file (default: config/default.ini)'
+    )
 
     args = parser.parse_args()
 
     # connect to modem
     port = ModemSerialCom.scanAndSelect()
     imgTrans = ImageTx(port, args.confFile)
-    
+
     while True:
         inp = input('>> ')
-        
+
         inp = inp.strip()  # strip leading/trailing spaces
-        inp = re.sub("\s{2,}", " ", inp)  # remove multiple spaces (make one)
+        inp = re.sub(r"\s{2,}", " ", inp)  # remove multiple spaces (make one)
         inp = inp.split(' ')
         cmd = inp[0]
-        
-        if (len(cmd) > 0 and cmd[0] != '#'):
+
+        if len(cmd) > 0 and cmd[0] != '#':
             if cmd == 'exit' or cmd == 'quit':
                 imgTrans.close()
-                exit() 
-                
+                exit()
+
             if cmd == 'capture':
                 if len(inp) == 1:
                     imgTrans.requestImg()
                 else:
                     try:
-                        size = (int(inp[1]),int(inp[2]))
+                        size = (int(inp[1]), int(inp[2]))
                         qual = int(inp[3])
                         flash = bool(inp[4])
-                        imgTrans.requestImg(size,qual,flash)
+                        imgTrans.requestImg(size, qual, flash)
                     except:
-                        print('ERROR: improper parameter list!')                     
-                
-    
+                        print('ERROR: improper parameter list!')
+
+
 if __name__ == "__main__":
     main()
