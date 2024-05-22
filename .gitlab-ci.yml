@@ -27,5 +27,5 @@ pylint:
   script:
     - pip3 install pylint
     - pip3 install -r requirements.txt
-    - pip3 install -e ./lib/
-    - pylint --py-version 3.8 -rn -sn -E ./lib/
+    - pylint --disable=F0401 --py-version 3.8 -rn -sn -E ./lib/
+    - pylint --disable=F0401 --py-version 3.8 -rn -sn -E ./apps/

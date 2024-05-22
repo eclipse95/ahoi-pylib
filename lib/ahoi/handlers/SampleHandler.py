@@ -35,15 +35,15 @@
 
 """Handler to visualize sample data from modem."""
 
+import math
 
 from ahoi.handlers.Handler import Handler
 
-import math
 
 class SampleHandler(Handler):
     """SampleHandler."""
-    
-    def __init__(self, nAdc = 12):
+
+    def __init__(self, nAdc=12):
         # TODO
         Handler.__init__(self)
         self.src = -1
@@ -51,42 +51,40 @@ class SampleHandler(Handler):
         self.numTotal = 0
         self.numPost = 0
         self.adcRange = pow(2, nAdc)
-        
+
         # const
-        self.__Fs = 200    # sample frequency (kHz)
-        self.__Fmin = 50   # comm. freq. band lower limit (kHz)
-        self.__Fmax = 75   # comm. freq. band upper limit (kHz)
+        self.__Fs = 200  # sample frequency (kHz)
+        self.__Fmin = 50  # comm. freq. band lower limit (kHz)
+        self.__Fmax = 75  # comm. freq. band upper limit (kHz)
 
     def __del__(self):
         pass
 
     def handlePkt(self, pkt):
         """handle a modem pkt"""
-        #Handler.handlePkt(self, pkt) # FIXME needed?
+        # Handler.handlePkt(self, pkt) # FIXME needed?
         if pkt.header.type != 0xA0 or pkt.header.len == 0:
             return False
-        
+
         if pkt.header.len == 5:
             self.src = pkt.header.src
             self.numTotal = pkt.payload[1] * 256 + pkt.payload[2]
-            self.numPost = pkt.payload[3] * 256 + pkt.payload[4] 
+            self.numPost = pkt.payload[3] * 256 + pkt.payload[4]
             self.data = []
-            
+
         else:
             nb = math.floor(pkt.header.len / 2)
-            if (len(self.data) + nb <= self.numTotal):
+            if len(self.data) + nb <= self.numTotal:
                 for i in range(0, nb):
                     # TODO convert ADC range to [-2^(N-1),2^(N-1)[
-                    v = pkt.payload[2*i] * 256 + pkt.payload[2*i+1];
-                    if (v >= 2**15):
-                        v = v - 2**16
-                    self.data.append(v / 2**14)
-                    
-        return True
+                    v = pkt.payload[2 * i] * 256 + pkt.payload[2 * i + 1]
+                    if v >= 2 ** 15:
+                        v = v - 2 ** 16
+                    self.data.append(v / 2 ** 14)
 
+        return True
 
     def isComplete(self):
         return self.numTotal > 0 and len(self.data) == self.numTotal
-
 
 # EOF
