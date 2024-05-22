@@ -10,7 +10,7 @@ keywords = ["ahoi"]
 license = {file = "LICENSE"}
 readme = "INSTALL"
 authors = [{name = "TUHH"}]
-version = "9be79d29"
+version = "2019.1"
 
 classifiers = [
     "Intended Audience :: Science/Research",
