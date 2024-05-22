@@ -42,8 +42,7 @@ from dataclasses import dataclass
 
 from ahoi.imgtx.helpers import camera
 # other imports
-from ahoi.imgtx.helpers import imageviewer
-from ahoi.imgtx.helpers import jfif_splitter
+from ahoi.imgtx.helpers import imageviewer, jfif_splitter
 # modem imports
 from ahoi.modem.modem import Modem
 

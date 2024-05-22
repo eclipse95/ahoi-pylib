@@ -33,58 +33,59 @@
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #
 
-import time
 import os
-from PIL import Image
+import time
 from io import BytesIO
+
+from PIL import Image
+
 try:
     from picamera import PiCamera
     import RPi.GPIO as GPIO
 except ImportError:
     print("cannot import PiCamera and GPIO")
-    
+
 FLASH_PIN = 17
 
-#DEBUG_IMAGE = './images/underwater2_1920x1920.jpg' #  1:1
-DEBUG_IMAGE = './images/underwater2_1920x1440.jpg' #  4:3
-#DEBUG_IMAGE = './images/underwater2_1920x1080.jpg' # 16:9
+# DEBUG_IMAGE = './images/underwater2_1920x1920.jpg' #  1:1
+DEBUG_IMAGE = './images/underwater2_1920x1440.jpg'  # 4:3
+# DEBUG_IMAGE = './images/underwater2_1920x1080.jpg' # 16:9
 
-    
-class camera():
-    
-    def __init__(self,useCamera = True, useFlash = True):
+
+class camera:
+
+    def __init__(self, useCamera=True, useFlash=True):
         self.useCamera = useCamera
         self.useFlash = useFlash
-        
+
         if self.useCamera:
             try:
                 self.cam = PiCamera()
             except:
                 self.useCamera = False
-                
+
         if self.useFlash:
             try:
                 GPIO.setmode(GPIO.BCM)
                 GPIO.setup(FLASH_PIN, GPIO.OUT)
             except:
                 self.useFlash = False
-            
-                    
+
     def __del__(self):
         if self.useFlash:
             GPIO.cleanup()
-    
+
     def _flashOn(self):
         if self.useFlash:
-            GPIO.output(FLASH_PIN,GPIO.HIGH)
+            GPIO.output(FLASH_PIN, GPIO.HIGH)
             time.sleep(0.5)
-        
+
     def _flashOff(self):
         if self.useFlash:
             time.sleep(0.1)
-            GPIO.output(FLASH_PIN,GPIO.LOW)
-        
-    def capture(self,size,flash = None):
+            GPIO.output(FLASH_PIN, GPIO.LOW)
+
+    def capture(self, size, flash=None):
         if self.useCamera:
             stream = BytesIO()
             self.cam.resolution = size
@@ -100,8 +101,8 @@ class camera():
             image = Image.open(stream)
             self.cam.stop_preview()
         else:
-            filepath = os.path.join(os.path.dirname(__file__),DEBUG_IMAGE)
+            filepath = os.path.join(os.path.dirname(__file__), DEBUG_IMAGE)
             image = Image.open(filepath)
             image = image.resize(size)
-            
+
         return image
