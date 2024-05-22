@@ -39,6 +39,8 @@
 
 from __future__ import print_function
 
+from typing import Union
+
 import numpy as np
 
 import threading
@@ -60,11 +62,13 @@ class Anchor3D:
 
 
 class Robot:
-    def __init__(self, z, com):
-        self.sos = None
-        self.A = None
-        self.pktType = None
-        self.intvl = None
+    def __init__(self, z, com, intvl=5.0, pktType=0, anchors=None, sos=1450.0):
+        self.sos = sos
+        if anchors is None:
+            anchors = []
+        self.A = anchors
+        self.pktType = pktType
+        self.intvl = intvl
         self.r = 0  # round
         self.z = 0  # depth
         self.tofOffset = 0  # offset of TOF values (should be done by modem => 0)
@@ -123,8 +127,8 @@ class Robot:
             return
 
         ## prepare matrix
-        M = np.empty([N - 1, 2], dtype=float)
-        b = np.empty([N - 1, 1], dtype=float)
+        M = np.empty([N - 1, 2], dtype=float)   # type: np.ndarray
+        b = np.empty([N - 1, 1], dtype=float)   # type: np.ndarray
         a0 = self.A[R[0]]
         rr0 = -a0.d ** 2 + (a0.z - self.z) ** 2 + a0.x ** 2 + a0.y ** 2
         for i in range(1, N):

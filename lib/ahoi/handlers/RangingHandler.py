@@ -37,6 +37,7 @@
 
 import math
 from collections import deque
+from typing import Deque
 
 from ahoi.handlers.Handler import Handler
 import matplotlib.pyplot as plt
@@ -46,8 +47,8 @@ class RangingHandler(Handler):
 
     def __init__(self, c=1490, n=100):
         # TODO
-        self.seq = deque()
-        self.dist = deque()
+        self.seq = deque()  # type: Deque[int]
+        self.dist = deque() # type: Deque[int]
         self.c = c
         self.n = n
         self.fig = plt.figure()
@@ -103,7 +104,7 @@ class RangingHandler(Handler):
             ar = self.seq[-1]
             al = self.seq[-1] - self.n + 1
         ymax = math.ceil(max(self.dist) / 10) * 10
-        self.ax.axis([al, ar, 0, ymax])
+        self.ax.axis((al, ar, 0, ymax))
         self.ax.grid(True)
 
         # HACK add a little pause, or plot will not show ...

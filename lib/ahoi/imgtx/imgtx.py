@@ -39,6 +39,7 @@ import os
 import threading
 import time
 from dataclasses import dataclass
+from typing import Union
 
 from ahoi.imgtx.helpers import camera
 # other imports
@@ -143,7 +144,7 @@ class ImageTx:
 
         self.dstId = 0xFF  # modem ID of the other station
 
-        self.gui = None
+        self.gui = None # type: Union[imageviewer.imageviewer, None]
 
         self.imgStream = jfif_splitter.jfif_splitter(progressive=self.imgParamDflt.progressive)
 
@@ -158,7 +159,7 @@ class ImageTx:
         self.transThread = threading.Thread(target=self._transmissionThread)
         self.transThread.start()
         # receiving timeout
-        self.receivingTimeoutTimer = None
+        self.receivingTimeoutTimer = None   # type: Union[threading.Timer, None]
 
     def __del__(self):
         self.close()
@@ -180,7 +181,7 @@ class ImageTx:
         self.transParam.camModemId = config['TRANSMISSION_PARAMETERS'].getint('camModemId')
         self.transParam.hardAck = config['TRANSMISSION_PARAMETERS'].getboolean('hardAck')
         self.transParam.payloadLength = config['TRANSMISSION_PARAMETERS'].getint('payloadLength')
-        self.transParam.ackTimeout = config['TRANSMISSION_PARAMETERS'].getfloat('ackTimeout')
+        self.transParam.ackTimeout = config['TRANSMISSION_PARAMETERS'].getint('ackTimeout')
         self.transParam.numRetransmissions = config['TRANSMISSION_PARAMETERS'].getint('numRetransmissions')
         self.transParam.logging = config['TRANSMISSION_PARAMETERS'].getboolean('logging')
         if not self.transParam.hardAck:
@@ -384,75 +385,75 @@ class ImageTx:
         return self._send(self.dstId, data, TYPE_CMD, ACK_PLAIN, self.pktStat.txPkt % 256)
 
     def _endImgReceiving(self, rxPktStat):
+        if self.gui is not None:
+            self.gui.stopTimer()
+            proTime = self.gui.getTimerValue()
+            proTime = round(proTime / 60)  # min
+            if self.receivingTimeoutTimer is not None:
+                self.receivingTimeoutTimer.cancel()
 
-        self.gui.stopTimer()
-        proTime = self.gui.getTimerValue()
-        proTime = round(proTime / 60)  # min
+            print('')
+            print('### Image received ###')
+            print('Image-Receiver: ', self.pktStat)
+            print('Image-Transmitter: ', rxPktStat)
+            print(
+                'Note: Img-Transmitter transmits pktStat with the last packet (->  txPkt, rxAck and retrans from this packet is missing in pktStat)')
+            print('Image-Size: ', self.imgStream.getHeaderSize() + self.imgStream.getDataSize(), 'Bytes')
+            print('Transmission time: ', proTime, 'min')
+            print('#######################')
+            print('')
 
-        self.receivingTimeoutTimer.cancel()
+            if self.transParam.logging:
+                img = self.imgStream.getImage()
+                if img is not None:
+                    filename = self.timeStr + "_rxImg.jpg"
+                    i = 0
+                    while os.path.isfile(filename):
+                        i += 1
+                        filename = self.timeStr + '_rxImg({}).jpg'.format(i)
+                    img.save(filename)
+                    # create transmission info file
+                    if i == 0:
+                        filename = self.timeStr + "_info.log"
+                    else:
+                        filename = self.timeStr + "_info({}).log".format(i)
+                    file = open(filename, 'w+')
+                    file.write("### Image Info ### \n")
+                    file.write("Size:        {}x{} Pixel \n".format(self.imgParam.size[0], self.imgParam.size[1]))
+                    file.write("Quality:     {} % \n".format(self.imgParam.quality))
+                    file.write("Flash:       {}  \n".format(self.imgParam.useFlash))
+                    file.write("Progressive: {}  \n".format(self.imgParamDflt.progressive))
+                    file.write(
+                        "Data Size:   {} Byte \n".format(self.imgStream.getHeaderSize() + self.imgStream.getDataSize()))
+                    file.write("\n")
+                    file.write("### Transmission Info ### \n")
+                    file.write("Payload:             {} Byte \n".format(self.transParam.payloadLength))
+                    file.write("Hard-ACKs:           {} \n".format(self.transParam.hardAck))
+                    file.write("ACK timeout:         {} s \n".format(self.transParam.ackTimeout))
+                    file.write("Max retransmissions: {} \n".format(self.transParam.numRetransmissions))
+                    file.write("\n")
+                    file.write(
+                        "Img-Receiver:    rxPkt ={:4d}, rxAck ={:4d}, txPkt ={:4d}, txAck ={:4d}, retrans ={:4d} \n".format(
+                            self.pktStat.rxPkt, self.pktStat.rxAck, self.pktStat.txPkt, self.pktStat.txAck,
+                            self.pktStat.retrans))
+                    file.write(
+                        "Img-Transmitter: rxPkt ={:4d}, rxAck ={:4d}, txPkt ={:4d}, txAck ={:4d}, retrans ={:4d} \n".format(
+                            rxPktStat.rxPkt, rxPktStat.rxAck, rxPktStat.txPkt, rxPktStat.txAck, rxPktStat.retrans))
+                    file.write(
+                        "Note: Img-Transmitter transmits pktStat with the last packet (->  txPkt, rxAck and retrans from this packet is missing in pktStat) \n")
+                    file.write("\n")
+                    file.write("Time:      {} min \n".format(proTime))
+                    file.flush()
+                    os.fsync(file.fileno())
+                    file.close()
 
-        print('')
-        print('### Image received ###')
-        print('Image-Receiver: ', self.pktStat)
-        print('Image-Transmitter: ', rxPktStat)
-        print(
-            'Note: Img-Transmitter transmits pktStat with the last packet (->  txPkt, rxAck and retrans from this packet is missing in pktStat)')
-        print('Image-Size: ', self.imgStream.getHeaderSize() + self.imgStream.getDataSize(), 'Bytes')
-        print('Transmission time: ', proTime, 'min')
-        print('#######################')
-        print('')
+            # get and reset status
+            self._getModemStats()
+            self._clearModemStats()
 
-        if self.transParam.logging:
-            img = self.imgStream.getImage()
-            if img is not None:
-                filename = self.timeStr + "_rxImg.jpg"
-                i = 0
-                while os.path.isfile(filename):
-                    i += 1
-                    filename = self.timeStr + '_rxImg({}).jpg'.format(i)
-                img.save(filename)
-                # create transmission info file
-                if i == 0:
-                    filename = self.timeStr + "_info.log"
-                else:
-                    filename = self.timeStr + "_info({}).log".format(i)
-                file = open(filename, 'w+')
-                file.write("### Image Info ### \n")
-                file.write("Size:        {}x{} Pixel \n".format(self.imgParam.size[0], self.imgParam.size[1]))
-                file.write("Quality:     {} % \n".format(self.imgParam.quality))
-                file.write("Flash:       {}  \n".format(self.imgParam.useFlash))
-                file.write("Progressive: {}  \n".format(self.imgParamDflt.progressive))
-                file.write(
-                    "Data Size:   {} Byte \n".format(self.imgStream.getHeaderSize() + self.imgStream.getDataSize()))
-                file.write("\n")
-                file.write("### Transmission Info ### \n")
-                file.write("Payload:             {} Byte \n".format(self.transParam.payloadLength))
-                file.write("Hard-ACKs:           {} \n".format(self.transParam.hardAck))
-                file.write("ACK timeout:         {} s \n".format(self.transParam.ackTimeout))
-                file.write("Max retransmissions: {} \n".format(self.transParam.numRetransmissions))
-                file.write("\n")
-                file.write(
-                    "Img-Receiver:    rxPkt ={:4d}, rxAck ={:4d}, txPkt ={:4d}, txAck ={:4d}, retrans ={:4d} \n".format(
-                        self.pktStat.rxPkt, self.pktStat.rxAck, self.pktStat.txPkt, self.pktStat.txAck,
-                        self.pktStat.retrans))
-                file.write(
-                    "Img-Transmitter: rxPkt ={:4d}, rxAck ={:4d}, txPkt ={:4d}, txAck ={:4d}, retrans ={:4d} \n".format(
-                        rxPktStat.rxPkt, rxPktStat.rxAck, rxPktStat.txPkt, rxPktStat.txAck, rxPktStat.retrans))
-                file.write(
-                    "Note: Img-Transmitter transmits pktStat with the last packet (->  txPkt, rxAck and retrans from this packet is missing in pktStat) \n")
-                file.write("\n")
-                file.write("Time:      {} min \n".format(proTime))
-                file.flush()
-                os.fsync(file.fileno())
-                file.close()
-
-        # get and reset status 
-        self._getModemStats()
-        self._clearModemStats()
-
-        self.lock.acquire()
-        self.status = 'IDLE'
-        self.lock.release()
+            self.lock.acquire()
+            self.status = 'IDLE'
+            self.lock.release()
 
     def _processImgPayload(self, dsn, payload):
 
@@ -460,7 +461,8 @@ class ImageTx:
             # print("doppeltes paket")
             return
 
-        self.receivingTimeoutTimer.cancel()
+        if self.receivingTimeoutTimer is not None:
+            self.receivingTimeoutTimer.cancel()
         self.numRxImgPkt += 1
 
         if self.numRxImgPkt <= self.numHeadPkt:
@@ -471,7 +473,7 @@ class ImageTx:
             self.imgStream.addData(payload)
 
             img = self.imgStream.getImage()
-            if img is not None:
+            if img is not None and self.gui is not None:
                 self.gui.updateImage(img)
                 self.gui.resizeToImg()
 
@@ -479,10 +481,11 @@ class ImageTx:
             self.imgStream.addData(payload)
 
             img = self.imgStream.getImage()
-            if img is not None:
+            if img is not None and self.gui is not None:
                 self.gui.updateImage(img)
 
-        self.gui.updateBar(self.numRxImgPkt)
+        if self.gui is not None:
+            self.gui.updateBar(self.numRxImgPkt)
 
         self._startReceivingTimeoutTimer()
 

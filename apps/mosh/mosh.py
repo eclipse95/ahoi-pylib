@@ -65,6 +65,8 @@ from ahoi.modem.modem import Modem
 sigIntEn = True
 gIrq = False
 
+prompted = False
+
 
 def sigInt_handler(signal, frame):
     """Handle SIGINT (Ctrl+C)."""
@@ -319,7 +321,7 @@ def doSniffMode(inp):
             sniff = 0
         else:
             return -1
-    return myModem.sniffMode(sniff)
+    return myModem.sniffMode(sniff) # pylint: disable=E0606
 
 
 def doAgc(inp):
@@ -827,6 +829,7 @@ def doSendRep(inp):
             time.sleep(delay)
 
         print("send-rep packet %3u of %u" % (i + 1, rep))
+        # pylint: disable-next=E0606
         ret = myModem.send(src=0, dst=dst, type=pkttype, status=status, dsn=(i % 256),
                            payload=data.encode('ascii', 'ignore'))
         if ret != 0:
@@ -966,7 +969,7 @@ def readInput():
 
         if len(inp) > 0:
             inp = inp.rstrip('\n')
-            print('\nmosh@%s >> %s (from "%s")' % (dev, inp, runFileName))
+            print('\nmosh@%s >> %s (from "%s")' % (dev, inp, runFileName))  # pylint: disable=E0606
         else:
             runFile.close()
             #runFile = False
@@ -1039,6 +1042,7 @@ def __inputThread():
 
             else:
                 if cmd in cmdList:
+                    ret = -1
                     try:
                         ret = eval(cmdList[cmd]['func'])(inp)
                     except ValueError:

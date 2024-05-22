@@ -69,8 +69,8 @@ def main():
 
         inp = inp.strip()  # strip leading/trailing spaces
         inp = re.sub(r"\s{2,}", " ", inp)  # remove multiple spaces (make one)
-        inp = inp.split(' ')
-        cmd = inp[0]
+        split_inp = inp.split(' ')
+        cmd = split_inp[0]
 
         if len(cmd) > 0 and cmd[0] != '#':
             if cmd == 'exit' or cmd == 'quit':
@@ -78,13 +78,13 @@ def main():
                 exit()
 
             if cmd == 'capture':
-                if len(inp) == 1:
+                if len(split_inp) == 1:
                     imgTrans.requestImg()
                 else:
                     try:
-                        size = (int(inp[1]), int(inp[2]))
-                        qual = int(inp[3])
-                        flash = bool(inp[4])
+                        size = (int(split_inp[1]), int(split_inp[2]))
+                        qual = int(split_inp[3])
+                        flash = bool(split_inp[4])
                         imgTrans.requestImg(size, qual, flash)
                     except:
                         print('ERROR: improper parameter list!')

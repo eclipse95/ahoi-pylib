@@ -147,42 +147,42 @@ class ModemSocketCom(ModemBaseCom):
 
     def receive(self):
         """Receive and decode TCP packet"""
+        if self.sock is not None:
+            while not self.__forceClose:
+                if self.serverMode:
+                    while not self.__forceClose:
+                        try:
+                            self.conn, addr = self.sock.accept()
+                            self.conn.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
+                            #self.sock.settimeout(self.SERVER_TIMEOUT)
+                            # make sure that receiving doesn't block forever
+                            self.conn.settimeout(self.SERVER_TIMEOUT)
+                            print("Connection from %s:%u established" % (addr[0], addr[1]))
+                            break
+                        except socket.timeout:
+                            continue
+                        except Exception as e:
+                            print("socket.receive() srv: " + str(e))  # FIXME debug message
+                            return
 
-        while not self.__forceClose:
-            if self.serverMode:
-                while not self.__forceClose:
+                while self.conn and not self.__forceClose:
                     try:
-                        self.conn, addr = self.sock.accept()
-                        self.conn.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
-                        #self.sock.settimeout(self.SERVER_TIMEOUT)
-                        # make sure that receiving doesn't block forever
-                        self.conn.settimeout(self.SERVER_TIMEOUT)
-                        print("Connection from %s:%u established" % (addr[0], addr[1]))
-                        break
+                        #rx = self.conn.recv(1, socket.MSG_CMSG_CLOEXEC)
+                        rx = self.conn.recv(1)
+                        if not rx:
+                            if not self.serverMode:
+                                print("ERROR: socket probably disconnected")
+                                return  # FIXME is this enough?
+                            else:
+                                print("Client disconnected")
+                                break
                     except socket.timeout:
                         continue
                     except Exception as e:
-                        print("socket.receive() srv: " + str(e))  # FIXME debug message
+                        print("socket.receive() rx: " + str(e))  # FIXME debug message
                         return
 
-            while self.conn and not self.__forceClose:
-                try:
-                    #rx = self.conn.recv(1, socket.MSG_CMSG_CLOEXEC)
-                    rx = self.conn.recv(1)
-                    if not rx:
-                        if not self.serverMode:
-                            print("ERROR: socket probably disconnected")
-                            return  # FIXME is this enough?
-                        else:
-                            print("Client disconnected")
-                            break
-                except socket.timeout:
-                    continue
-                except Exception as e:
-                    print("socket.receive() rx: " + str(e))  # FIXME debug message
-                    return
-
-                super().processRx(rx)
+                    super().processRx(rx)
 
         return
 
@@ -191,7 +191,8 @@ class ModemSocketCom(ModemBaseCom):
 
         # send encoded data
         tx = super().processTx(pkt)
-        self.conn.sendall(tx)
+        if self.conn is not None:
+            self.conn.sendall(tx)
 
     @classmethod
     def scanAndSelect(cls):

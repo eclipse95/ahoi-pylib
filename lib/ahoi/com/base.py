@@ -37,6 +37,7 @@
 
 import time
 import os.path
+from abc import ABC
 from io import TextIOWrapper
 from typing import Callable, Union
 
@@ -44,7 +45,7 @@ from ahoi.modem.packet import packet2HexString, byteArrayToPacket, getBytes
 from ahoi.com.streamer import Streamer
 
 
-class ModemBaseCom:
+class ModemBaseCom(ABC):
 
     def __init__(self, dev=None, cb=None):
         """Initialize serial com."""

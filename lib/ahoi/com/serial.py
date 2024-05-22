@@ -36,6 +36,7 @@
 """Module for serial modem com interfacing."""
 
 import time
+from typing import Union
 
 import serial
 from serial.tools.list_ports import comports
@@ -48,7 +49,7 @@ class ModemSerialCom(ModemBaseCom):
     def __init__(self, dev=None, cb=None):
         """Initialize serial com."""
         super().__init__(dev, cb)
-        self.com = None
+        self.com = None # type: Union[serial.Serial, None]
         self.txDelay = 0.1
         self.__keepAlive = False
         # self.__lock = threading.Semaphore()
@@ -77,22 +78,24 @@ class ModemSerialCom(ModemBaseCom):
             exit()
 
     def reconnect(self):
-        self.com.open()
-        self.__keepAlive = False
+        if self.com is not None:
+            self.com.open()
+            self.__keepAlive = False
 
     def disconnect(self):
-        self.__keepAlive = True
-        self.com.flush()
-        self.com.cancel_read()
-        self.com.close()
+        if self.com is not None:
+            self.__keepAlive = True
+            self.com.flush()
+            self.com.cancel_read()
+            self.com.close()
 
     def close(self):
         """Terminate."""
         try:
-            self.com.close()
+            if self.com is not None:
+                self.com.close()
         except:
             pass
-
         super().close()
 
     def receive(self):

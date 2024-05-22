@@ -40,6 +40,7 @@ import string
 import os.path
 import threading
 import subprocess
+from typing import Union
 
 from ahoi.modem.packet import makePacket, packet2HexString, isCmdType
 
@@ -62,7 +63,7 @@ class Modem:
         self.rxThread = None
         self.echoTx = False
         self.echoRx = False
-        self.com = None
+        self.com = None # type: Union[ModemBaseCom, None]
 
         # consts
         self.MAX_PEAKWINLEN = 640  # us
@@ -152,11 +153,12 @@ class Modem:
             h.handlePkt(pkt)
 
     def receive(self, thread=False):
-        if not thread:
-            self.com.receive()
-        else:
-            self.rxThread = threading.Thread(target=self.com.receive)
-            self.rxThread.start()
+        if self.com is not None:
+            if not thread:
+                self.com.receive()
+            else:
+                self.rxThread = threading.Thread(target=self.com.receive)
+                self.rxThread.start()
 
     def send(self, src, dst, type, payload=bytearray(), status=None, dsn=None):
         """Send a packet."""
@@ -178,7 +180,8 @@ class Modem:
             # packet.printPacket(pkt)
 
         # hand over to com
-        self.com.send(pkt)  # FIXME how to handle delays with different connections?
+        if self.com is not None:
+            self.com.send(pkt)  # FIXME how to handle delays with different connections?
 
         # manage seqnos
         self.seqNumber = (self.seqNumber + 1) % 256
@@ -503,7 +506,8 @@ class Modem:
 
     def logOn(self, file_name=None):
         """Turn logging to file on."""
-        self.com.logOn(file_name)
+        if self.com is not None:
+            self.com.logOn(file_name)
         #if self.logFile is not None:
         #    if not self.logFile.closed:
         #        self.logOff()
@@ -514,7 +518,8 @@ class Modem:
 
     def logOff(self):
         """Turn logging to file off."""
-        self.com.logOff()
+        if self.com is not None:
+            self.com.logOff()
         #if self.logFile is not None:
         #    self.logFile.flush()
         #    print("Closed logfile {}".format(self.logFile.name))

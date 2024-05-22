@@ -77,7 +77,7 @@ class SamplePlotHandler(SampleHandler):
         return ret
 
     def plot(self):
-        if self.fig is None:
+        if self.fig is None or self.axs is None:
             self.fig, self.axs = plt.subplots(nrows=2, ncols=1, figsize=(10, 6))  # figsize = (a,b)
             self.__cbar = False
 

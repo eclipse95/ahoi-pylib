@@ -37,12 +37,13 @@ import math
 import os
 import threading
 import time
+from typing import Union
 
 from PIL import Image
 
 print("GUI created with the help of:")
 import pygame
-from pygame.locals import *
+from pygame.locals import RESIZABLE
 
 
 class imageviewer:
@@ -77,16 +78,15 @@ class imageviewer:
         self.numMaxPkt = 0
 
         # timer settings
-        self.timerVal = 0
+        self.timerVal = 0.0
         self.timerIsRunning = False
 
         self.run = True
         self.lock = threading.Lock()
 
-        self.img = None
-        self.pilImg = None
-
-        self.updateImage(logo)
+        self.img = None # type: Union[pygame.Surface, None]
+        self.pilImg = logo
+        self._convertImage()
 
         # init monitoring thread
         self.eventThread = threading.Thread(target=self._guiProcess)
@@ -225,10 +225,10 @@ class imageviewer:
         # update image
         xpos = math.floor((self.appWidth - self.imgWidth) / 2)
         ypos = math.floor(self.appHeight - self.imgHeight)
-
-        self.lock.acquire()
-        self.app.blit(self.img, (xpos, ypos))
-        self.lock.release()
+        if self.img is not None:
+            self.lock.acquire()
+            self.app.blit(self.img, (xpos, ypos))
+            self.lock.release()
         # update progress bar
         offset = 10
         xpos = offset
@@ -297,7 +297,7 @@ class imageviewer:
     def resetTimer(self):
         self.lock.acquire()
         self.timerIsRunning = False
-        self.timerVal = 0
+        self.timerVal = 0.0
         self.lock.release()
 
     def getTimerValue(self):
