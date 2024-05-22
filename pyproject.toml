@@ -14,7 +14,7 @@ version = "2019.1"
 
 classifiers = [
     "Intended Audience :: Science/Research",
-    "License :: OSI Approved :: BSD 3-Clause",
+    "License :: OSI Approved :: BSD License",
     "Programming Language :: Python",
     "Programming Language :: Python :: 3.7",
     "Programming Language :: Python :: 3.8",
@@ -26,7 +26,7 @@ dependencies = [
     "pyserial",
     "numpy",
     "matplotlib",
-    "PIL"
+    "pillow"
 ]
 
 [project.urls]
@@ -35,11 +35,15 @@ documentation = "https://collaborating.tuhh.de/e-24/public/ahoi/pylib"
 repository = "https://collaborating.tuhh.de/e-24/public/ahoi/pylib"
 
 [tool.setuptools.packages.find]
+where = ["lib", "apps"]
 exclude = [""]
 
 [project.optional-dependencies]
 rpi = [
     "picamera",
-    "RPi.GPIO"
+    "RPi.GPIO",
+    "pygame"
 ]
-pygame = ["pygame"]
+
+[console_scripts]
+mosh = "mosh.mosh"
