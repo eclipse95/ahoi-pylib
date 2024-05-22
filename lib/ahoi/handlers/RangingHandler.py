@@ -35,16 +35,16 @@
 
 """Handler to visualize distances."""
 
+import math
+from collections import deque
 
 from ahoi.handlers.Handler import Handler
-from collections import deque
-import math
-
+import matplotlib.pyplot as plt
 
 class RangingHandler(Handler):
     """RangingHandler."""
-    
-    def __init__(self, c = 1490, n = 100):
+
+    def __init__(self, c=1490, n=100):
         # TODO
         Handler.__init__(self)
         self.seq = deque()
@@ -52,69 +52,66 @@ class RangingHandler(Handler):
         self.c = c
         self.n = n
         self.fig = plt.figure()
-        self.ax = self.fig.add_subplot(1,1,1)
+        self.ax = self.fig.add_subplot(1, 1, 1)
 
     def __del__(self):
         pass
-        #if (self.fig):
+        # if (self.fig):
         #    pyplot.close(self.fig)
 
     def handlePkt(self, pkt):
         """handle a modem pkt"""
-        #Handler.handlePkt(self, pkt) # FIXME needed?
-        if (pkt.header.type != 0x7F or pkt.header.len != 16):
+        # Handler.handlePkt(self, pkt) # FIXME needed?
+        if pkt.header.type != 0x7F or pkt.header.len != 16:
             return False
-        
+
         # sequence number (handle wraps)
         seq = pkt.header.seqno
         if len(self.seq) > 0 and self.seq[-1] >= seq:
-            seq = Math.ceil(self.seq[-1] / 256) * 256 + seq
-        
+            seq = math.ceil(self.seq[-1] / 256) * 256 + seq
+
         # tof
         tof = 0
-        for i in range(0,4):
+        for i in range(0, 4):
             tof = tof * 256 + pkt.payload[i]
-        print("distance: %6.1f" % (tof))
-        
+        print("distance: %6.1f" % tof)
+
         # append
-        self.seq.append( seq )
-        self.dist.append( tof * 1e-6 * self.c )
-        
-        if (len(self.dist) > self.n):
+        self.seq.append(seq)
+        self.dist.append(tof * 1e-6 * self.c)
+
+        if len(self.dist) > self.n:
             self.seq.popleft()
             self.dist.popleft()
-            
+
         self.plot()
         return True
-        
-        
+
     def plot(self):
         # reset plot
         self.ax.clear()
-        
+
         ## plot data
         self.ax.plot(self.seq, self.dist, 'bx-')
-        
+
         ## layout
         self.ax.set_xlabel('sample')
         self.ax.set_ylabel('distance (m)')
-        if self.seq.len >= self.n:
+        if len(self.seq) >= self.n:
             ar = self.n
             al = 1
         else:
             ar = self.seq[-1]
             al = self.seq[-1] - self.n + 1
-        ymax = math.ceil(self.dist.max() / 10) * 10
+        ymax = math.ceil(max(self.dist) / 10) * 10
         self.ax.axis([al, ar, 0, ymax])
-        self.ax.grid(True);
-        
+        self.ax.grid(True)
+
         # HACK add a little pause, or plot will not show ...
         plt.pause(0.001)
-        
-        
+
     def close(self):
-        if (self.fig):
-            plt.close(self.fig)      
+        if self.fig:
+            plt.close(self.fig)
 
-
-# EOF
+        # EOF
