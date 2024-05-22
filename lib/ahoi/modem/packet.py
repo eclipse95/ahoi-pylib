@@ -39,18 +39,16 @@ import collections
 HEADER_FORMAT = 'BBBBBB'
 FOOTER_FORMAT = 'BBBBBB'
 
-
 # PAYLOAD_MAXLEN = 2**LENGTH_SIZE
 TYPE_SIZE = 8
 ADDRESS_SIZE = 8
-MM_TYPE_ACK = (2**TYPE_SIZE) - 1
-MM_ADDR_BCAST = (2**ADDRESS_SIZE) - 1
+MM_TYPE_ACK = (2 ** TYPE_SIZE) - 1
+MM_ADDR_BCAST = (2 ** ADDRESS_SIZE) - 1
 
 # ACK_TYPE
 ACK_NONE = 0
 ACK_PLAIN = 1
 ACK_RANGE = 2
-
 
 Header = collections.namedtuple('Header', ['src', 'dst', 'type', 'status', 'dsn', 'len'])
 Packet = collections.namedtuple('Packet', ['header', 'payload', 'footer'])
@@ -77,21 +75,21 @@ def byteArrayToPacket(rxBytes):
     #     h = bytearray([0, 0, 0, 0, 0, 0])
     #     p = bytearray([])
     #     return Packet(h, p, None)
-    payload = rxBytes[headLen:(headLen+paylen)]
+    payload = rxBytes[headLen:(headLen + paylen)]
     # FIXME check for difference matching footer length, 0 (no footer), or else (ERROR, invalid)
     if (header.type < 0x80 and
-        ((len(rxBytes) - headLen - paylen) == len(FOOTER_FORMAT))):
-            footerBytes = rxBytes[(headLen+paylen):]
-            footer = Footer(*struct.unpack(FOOTER_FORMAT, footerBytes))
+            ((len(rxBytes) - headLen - paylen) == len(FOOTER_FORMAT))):
+        footerBytes = rxBytes[(headLen + paylen):]
+        footer = Footer(*struct.unpack(FOOTER_FORMAT, footerBytes))
     else:
         footer = None  # Footer(0, 0, 0, 0, 0, 0)
     return Packet(header, payload, footer)
 
 
-def makePacket(src=0, dst=MM_ADDR_BCAST, type=0, ack=ACK_NONE, dsn=0, payload=bytes()):
+def makePacket(src=0, dst=MM_ADDR_BCAST, pkt_type=0, ack=ACK_NONE, dsn=0, payload=bytes()):
     status = ack
     paylen = len(payload)
-    header = Header(src, dst, type, status, dsn, paylen)
+    header = Header(src, dst, pkt_type, status, dsn, paylen)
     footer = None
     pkt = Packet(header, payload, footer)
     return pkt
@@ -109,9 +107,11 @@ def getFooterBytes(pkt):
         footerBytes += struct.pack(FOOTER_FORMAT, *pkt.footer)
     return footerBytes
 
+
 def hasFooter(pkt):
     return pkt.footer is not None
-  
+
+
 def isCmdType(pkt):
     return pkt.header.type >= 0x80
 
@@ -123,8 +123,8 @@ def getBytes(pkt):
     if hasFooter(pkt):
         pktbytes += struct.pack(FOOTER_FORMAT, *pkt.footer)
     return pktbytes
-  
-  
+
+
 def packet2HexString(pkt):
     byteArray = getHeaderBytes(pkt) + pkt.payload
     if hasFooter(pkt):
