@@ -1,0 +1,30 @@
+stages:
+  - build
+  - testing
+
+
+build-package:
+  image: docker-registry.univ-nantes.fr/abitaillou1/acolite:latest
+  stage: build
+  script:
+    - pip3 install build
+    - python3 -m build
+  artifacts:
+    paths:
+      - dist/*.whl
+
+mypy:
+  image: docker-registry.univ-nantes.fr/abitaillou1/acolite:latest
+  stage: testing
+  script:
+    - pip3 install mypy
+    - pip3 install -r requirements.txt
+    - mypy --python-version 3.8  --install-types --ignore-missing-imports --check-untyped-defs --non-interactive ./lib/
+
+pylint:
+  image: docker-registry.univ-nantes.fr/abitaillou1/acolite:latest
+  stage: testing
+  script:
+    - pip3 install pylint
+    - pip3 install -r requirements.txt
+    - pylint --py-version 3.8 -rn -sn -E ./lib/
