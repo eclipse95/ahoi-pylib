@@ -775,6 +775,8 @@ def doSend(inp):
         dst = int(param[0])
     try:
         pkttype = int(param[1], 16)
+        if (pkttype >= 0x80):
+            return -1
     except ValueError:
         return -1
     
@@ -816,6 +818,8 @@ def doSendRep(inp):
         dst = int(param[2])
     try:
         pkttype = int(param[3], 16)
+        if (pkttype >= 0x80):
+            return -1
     except ValueError:
         return -1
     
