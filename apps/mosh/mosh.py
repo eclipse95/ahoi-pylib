@@ -255,6 +255,11 @@ cmdList = {
         'func': "doSfdStatClear",
         'param': ''
     },
+    "sleep": {
+        'func': "doSleep",
+        'param': '',
+        'info': "put modem into sleep mode (can only be undone via powercycle or WAKEUP pin)"
+    },
     "syncstat": {
         'func': "doSyncStat",
         'param': ''
@@ -289,6 +294,11 @@ cmdList = {
     "testnoise": {
         'func': "doTestNoise",
         'param': '[gaincomp:bool<false> step:uint<1> duration:uint<1>]'
+    },
+    "testsound": {
+        'func': "doTestSound",
+        'param': '[duration:uint<100>]',
+        'info': "Play an audible test sound (ca. 4kHz) for duration/100 s"
     },
     "batvol": {
         'func': "doBatVol",
@@ -732,6 +742,11 @@ def doReset(inp):
     return myModem.reset()
 
 
+def doSleep(inp):
+    """Sleep the modem."""
+    return myModem.sleep()
+
+
 def doSample(inp):
     """Get samples."""
     if len(inp) < 2:
@@ -764,6 +779,8 @@ def doSend(inp):
         dst = int(param[0])
     try:
         pkttype = int(param[1], 16)
+        if (pkttype >= 0x80):
+            return -1
     except ValueError:
         return -1
 
@@ -805,6 +822,8 @@ def doSendRep(inp):
         dst = int(param[2])
     try:
         pkttype = int(param[3], 16)
+        if (pkttype >= 0x80):
+            return -1
     except ValueError:
         return -1
 
@@ -915,6 +934,19 @@ def doTestNoise(inp):
             dur = int(param[2])
 
     return myModem.testNoise(gc, step, dur)
+
+
+def doTestSound(inp):
+    """Test sound (audible) output."""
+    dur  = 100
+    if len(inp) > 1:
+        param = inp[1].split(' ')
+        if len(param) < 0 or len(param) > 1 :
+            return -1
+
+        dur = int(param[0])
+
+    return myModem.testSound(dur)
 
 
 def doTxGain(inp):

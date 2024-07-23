@@ -436,6 +436,15 @@ class Modem:
         pkt = makePacket(pkt_type=0xB3, payload=data)
         return self.__sendPacket(pkt)
 
+    def testSound(self, dur=100):
+        """Test sound (audible)."""
+        data = bytearray()
+        if dur < 1 or dur > 250:
+            return -1
+        data += dur.to_bytes(1, 'big')
+        pkt = makePacket(type=0xB4, payload=data)
+        return self.__sendPacket(pkt)
+
     def txGain(self, value=None):
         """Get or Set TX gain."""
         data = bytearray()
@@ -447,6 +456,11 @@ class Modem:
     def reset(self):
         """Reset the MCU of the modem."""
         pkt = makePacket(pkt_type=0x87)
+        return self.__sendPacket(pkt)
+      
+    def sleep(self):
+        """Put MCU/modem in sleep mode."""
+        pkt = makePacket(type=0x88)
         return self.__sendPacket(pkt)
 
     def sample(self, trigger=None, num=None, post=None):

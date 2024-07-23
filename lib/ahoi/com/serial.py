@@ -52,7 +52,6 @@ class ModemSerialCom(ModemBaseCom):
         self.com = None # type: Union[serial.Serial, None]
         self.txDelay = 0.1
         self.__keepAlive = False
-        # self.__lock = threading.Semaphore()
 
     def __del__(self):
         """Close connection."""
@@ -102,7 +101,6 @@ class ModemSerialCom(ModemBaseCom):
         """Receive and decode serial packet"""
         self.__keepAlive = False
         while self.com and (self.com.is_open or self.__keepAlive):
-            # self.__lock.acquire()
             try:
                 rx = self.com.read(self.com.in_waiting or 1)
             except:
